@@ -3,570 +3,679 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAESTRA // Fleet Manager</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>MAESTRA — Fleet Manager for Creative Installations</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080b0f;
-    --surface: #0d1117;
-    --surface2: #131a24;
-    --border: #1e2d3d;
-    --accent: #00d4ff;
-    --accent2: #7b2fff;
-    --active: #00ff88;
-    --warn: #ff6b35;
-    --text: #c8d8e8;
-    --text-dim: #4a6580;
-    --text-bright: #e8f4ff;
-    --slot-empty: #0a0f15;
-    --amber: #fbbf24;
-    --pink: #f472b6;
-    --font-mono: 'JetBrains Mono', monospace;
-    --font-display: 'Space Mono', monospace;
-  }
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a26;
+  --border:#2a2a3a; --accent:#a78bfa; --accent2:#7c3aed;
+  --green:#34d399; --red:#f87171; --amber:#fbbf24;
+  --cyan:#22d3ee; --text:#e2e2f0; --text-dim:#6b6b8a;
+  --text-bright:#ffffff; --pink:#f472b6;
+  --active:#00ff88; --warn:#ff6b35;
+  --font:'JetBrains Mono',monospace;
+}
+body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px; min-height:100vh; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(167,139,250,0.012) 2px,rgba(167,139,250,0.012) 4px); pointer-events:none; z-index:9999; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* HEADER */
+header { padding:18px 40px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,#0f0f1a 0%,var(--bg) 100%); position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); }
+.logo { font-family:var(--font); font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:0.18em; color:var(--accent); text-shadow:0 0 24px rgba(167,139,250,0.4); }
+.logo span { color:var(--text-dim); font-weight:400; font-size:12px; letter-spacing:0.08em; margin-left:14px; text-transform:none; }
+.header-right { display:flex; align-items:center; gap:20px; font-size:11px; }
+.status-pill { display:flex; align-items:center; gap:6px; color:var(--text-dim); letter-spacing:0.06em; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--text-dim); }
+.dot.online { background:var(--active); box-shadow:0 0 8px var(--active); animation:pulse 2s infinite; }
+.dot.offline { background:var(--warn); }
+.dot.connecting { background:var(--cyan); animation:blink 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.header-time { font-size:11px; color:var(--text-dim); letter-spacing:0.12em; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-mono);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* EXPLAINER */
+.explainer { padding:16px 40px; background:var(--surface); border-bottom:1px solid var(--border); font-size:12px; line-height:1.75; color:var(--text-dim); }
+.explainer strong { color:var(--accent); font-weight:700; }
+.explainer em { color:var(--cyan); font-style:normal; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.015) 2px, rgba(0,212,255,0.015) 4px);
-    pointer-events: none;
-    z-index: 9999;
-  }
+/* TAB NAV */
+.tab-nav { display:flex; border-bottom:1px solid var(--border); background:var(--surface); padding:0 40px; }
+.tab-btn { padding:12px 20px; font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim); background:none; border:none; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
 
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
+/* ── DASHBOARD TAB ── */
+.fleet-layout { display:grid; grid-template-columns:1fr 340px; height:calc(100vh - 172px); }
+.fleet-panel { padding:24px; overflow-y:auto; border-right:1px solid var(--border); }
+.panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.panel-title-sm { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:0.2em; color:var(--text-dim); text-transform:uppercase; }
+.entity-count { font-size:10px; color:var(--text-dim); background:var(--surface); border:1px solid var(--border); padding:3px 8px; border-radius:2px; letter-spacing:0.05em; }
 
-  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: 0.2em; color: var(--accent); text-shadow: 0 0 20px rgba(0,212,255,0.5); }
-  .logo span { color: var(--text-dim); font-weight: 400; }
+.slot-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.slot { background:var(--surface); border:1px solid var(--border); border-radius:4px; overflow:hidden; cursor:pointer; transition:border-color 0.2s,box-shadow 0.2s,transform 0.15s; position:relative; }
+.slot:hover { border-color:rgba(167,139,250,0.35); box-shadow:0 0 16px rgba(167,139,250,0.08); transform:translateY(-1px); }
+.slot.selected { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent),0 0 20px rgba(167,139,250,0.12); }
+.slot.active-slot .slot-label { color:var(--active); }
+.slot-video-area { width:100%; aspect-ratio:16/9; background:#06060c; position:relative; overflow:hidden; }
+.slot-video-area img { width:100%; height:100%; object-fit:cover; display:block; }
 
-  .header-status { display: flex; align-items: center; gap: 24px; font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; }
-  .status-indicator { display: flex; align-items: center; gap: 6px; }
+.slot-suggestion { position:absolute; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:14px 16px; gap:4px; }
+.suggestion-eyebrow { font-size:8px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-dim); opacity:0.4; margin-bottom:2px; }
+.suggestion-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text); opacity:0.5; }
+.suggestion-desc { font-size:9px; color:var(--text-dim); line-height:1.5; opacity:0.4; }
+.suggestion-tag { font-size:8px; font-weight:700; letter-spacing:0.1em; padding:2px 6px; border-radius:2px; text-transform:uppercase; margin-top:4px; opacity:0.45; }
+.suggestion-tag.td      { background:rgba(34,211,238,0.1);   color:var(--cyan);  border:1px solid rgba(34,211,238,0.15); }
+.suggestion-tag.scope   { background:rgba(244,114,182,0.1);  color:var(--pink);  border:1px solid rgba(244,114,182,0.15); }
+.suggestion-tag.max     { background:rgba(251,191,36,0.1);   color:var(--amber); border:1px solid rgba(251,191,36,0.15); }
+.suggestion-tag.browser { background:rgba(52,211,153,0.1);   color:var(--green); border:1px solid rgba(52,211,153,0.15); }
 
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: background 0.3s; }
-  .dot.online  { background: var(--active); box-shadow: 0 0 8px var(--active); animation: pulse 2s infinite; }
-  .dot.offline { background: var(--warn); }
-  .dot.connecting { background: var(--accent); animation: blink 1s infinite; }
+.slot-footer { padding:8px 10px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); }
+.slot-label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text); transition:color 0.2s; }
+.slot-meta { display:flex; align-items:center; gap:6px; }
+.slot-fps { font-size:9px; color:var(--text-dim); letter-spacing:0.05em; }
+.slot-tag { font-size:9px; font-weight:700; letter-spacing:0.1em; padding:2px 6px; border-radius:2px; text-transform:uppercase; }
+.slot-tag.stream { background:rgba(0,255,136,0.1); color:var(--active); border:1px solid rgba(0,255,136,0.2); }
+.slot-tag.empty  { background:rgba(74,101,128,0.1); color:var(--text-dim); border:1px solid rgba(74,101,128,0.15); }
 
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0} }
-  @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.selected-badge { position:absolute; top:8px; right:8px; width:18px; height:18px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; }
+.slot.selected .selected-badge { opacity:1; }
+.selected-badge svg { width:10px; height:10px; }
 
-  .header-time { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; }
+/* DETAIL PANEL */
+.detail-panel { display:flex; flex-direction:column; background:var(--surface); }
+.detail-video-container { width:100%; aspect-ratio:16/9; background:#000; position:relative; overflow:hidden; border-bottom:1px solid var(--border); }
+.detail-video-container img { width:100%; height:100%; object-fit:cover; display:block; }
+.detail-placeholder { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; }
+.detail-placeholder svg { opacity:0.15; }
+.detail-placeholder p { font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); }
+.video-overlay { position:absolute; bottom:0; left:0; right:0; padding:8px 12px; background:linear-gradient(0deg,rgba(0,0,0,0.7) 0%,transparent 100%); display:flex; align-items:center; justify-content:space-between; opacity:0; transition:opacity 0.2s; }
+.detail-video-container:hover .video-overlay { opacity:1; }
+.live-badge { display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--active); }
+.detail-info { padding:16px; flex:1; overflow-y:auto; }
+.detail-name { font-size:14px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-bright); margin-bottom:4px; }
+.detail-endpoint { font-size:10px; color:var(--text-dim); letter-spacing:0.05em; margin-bottom:16px; }
+.detail-endpoint a { color:var(--accent); text-decoration:none; }
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.stat-card { background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:10px 12px; }
+.stat-label { font-size:9px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; }
+.stat-value { font-size:20px; font-weight:700; color:var(--text-bright); line-height:1; }
+.stat-value.accent { color:var(--accent); }
+.stat-value.active { color:var(--active); }
+.detail-section-title { font-size:9px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.endpoint-list { display:flex; flex-direction:column; gap:4px; margin-bottom:16px; }
+.endpoint-row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--surface2); border-radius:2px; border:1px solid var(--border); }
+.endpoint-path { font-size:10px; color:var(--accent); letter-spacing:0.03em; }
+.endpoint-status { font-size:9px; font-weight:700; letter-spacing:0.06em; color:var(--text-dim); }
+.endpoint-status.ok  { color:var(--active); }
+.endpoint-status.err { color:var(--warn); }
+.ws-log { border-top:1px solid var(--border); padding:12px 16px; max-height:140px; overflow-y:auto; }
+.ws-log-title { font-size:9px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
+.log-line { font-size:10px; color:var(--text-dim); line-height:1.6; border-left:2px solid var(--border); padding-left:8px; margin-bottom:3px; }
+.log-line.info { border-left-color:var(--accent); color:var(--text); }
+.log-line.ok   { border-left-color:var(--active); }
+.log-line.err  { border-left-color:var(--warn); color:var(--warn); }
 
-  .main { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 57px); }
+/* ── USE CASES (below fleet, inside dashboard tab) ── */
+.use-cases { padding:32px 40px; border-top:1px solid var(--border); background:var(--surface); }
+.section-title { font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); margin-bottom:20px; }
+.scenarios { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.scenario { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:20px; transition:border-color 0.2s; }
+.scenario:hover { border-color:var(--accent); }
+.scenario-icon { font-size:22px; margin-bottom:10px; display:block; }
+.scenario-title { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-bright); margin-bottom:8px; }
+.scenario-desc { font-size:11px; color:var(--text-dim); line-height:1.65; }
+.code-block { padding:24px 40px; background:#060609; border-top:1px solid var(--border); font-size:12px; line-height:1.8; color:var(--text-dim); overflow-x:auto; }
+.code-block .kw  { color:var(--accent); font-weight:700; }
+.code-block .str { color:var(--green); }
+.code-block .num { color:var(--amber); }
+.code-block .cmt { color:#3a3a55; }
+.code-block .fn  { color:var(--cyan); }
 
-  .fleet-panel { padding: 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+/* ── SCOPE INTEGRATION TAB ── */
+.arch-section { padding:36px 40px; background:var(--bg); border-bottom:1px solid var(--border); }
+.arch-title { font-size:13px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+.arch-subtitle { font-size:12px; color:var(--text-dim); margin-bottom:24px; line-height:1.7; }
+.arch-diagram { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:28px; overflow-x:auto; font-size:11px; line-height:1.5; }
+.arch-diagram pre { font-family:var(--font); color:var(--text-dim); white-space:pre; margin:0; }
+.arch-diagram .node-maestra { color:var(--accent); font-weight:700; }
+.arch-diagram .node-scope    { color:var(--pink);   font-weight:700; }
+.arch-diagram .node-td       { color:var(--cyan);   font-weight:700; }
+.arch-diagram .node-stream   { color:var(--green); }
+.arch-diagram .node-proto    { color:var(--amber); }
+.arch-diagram .dim           { color:#2a2a3a; }
+.arch-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; }
+.arch-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:18px; }
+.arch-card-num   { font-size:11px; font-weight:700; letter-spacing:0.1em; color:var(--accent); margin-bottom:6px; }
+.arch-card-title { font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-bright); margin-bottom:8px; }
+.arch-card-desc  { font-size:11px; color:var(--text-dim); line-height:1.6; }
+.arch-card-desc code { background:rgba(167,139,250,0.1); color:var(--accent); padding:1px 5px; border-radius:3px; font-size:10px; }
 
-  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .panel-title  { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
-  .entity-count { font-size: 10px; color: var(--text-dim); background: var(--surface2); border: 1px solid var(--border); padding: 3px 8px; border-radius: 2px; letter-spacing: 0.05em; }
+/* ── TOX REFERENCE TAB ── */
+.tox-section { padding:28px 40px; background:var(--bg); border-bottom:1px solid var(--border); }
+.tox-title { font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
+.tox-params { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.tox-params-2col { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.tox-param { background:var(--surface); border:1px solid var(--border); border-radius:5px; padding:16px; }
+.tox-param-title { font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-bright); margin-bottom:8px; }
+.tox-param-list  { font-size:10px; color:var(--text-dim); line-height:1.85; }
 
-  .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+/* FOOTER */
+footer { padding:18px 40px; border-top:1px solid var(--border); background:var(--surface); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); display:flex; justify-content:space-between; align-items:center; }
+footer a { color:var(--accent); text-decoration:none; }
+footer a:hover { text-decoration:underline; }
 
-  .slot {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
-    overflow: hidden; cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-    position: relative;
-  }
-  .slot:hover { border-color: rgba(0,212,255,0.3); box-shadow: 0 0 16px rgba(0,212,255,0.08); transform: translateY(-1px); }
-  .slot.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 20px rgba(0,212,255,0.15); }
-  .slot.active-slot .slot-label { color: var(--active); }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:var(--text-dim); }
 
-  .slot-video-area { width: 100%; aspect-ratio: 16/9; background: var(--slot-empty); position: relative; overflow: hidden; }
-  .slot-video-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  /* Suggestion cards for empty slots */
-  .slot-suggestion {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-    padding: 14px 16px; gap: 4px;
-  }
-  .suggestion-eyebrow { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); opacity: 0.4; margin-bottom: 2px; }
-  .suggestion-title   { font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; opacity: 0.55; }
-  .suggestion-desc    { font-size: 9px; color: var(--text-dim); line-height: 1.5; opacity: 0.45; }
-  .suggestion-tag     { font-size: 8px; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-top: 4px; opacity: 0.4; }
-  .suggestion-tag.td      { background: rgba(0,212,255,0.1);   color: var(--accent); border: 1px solid rgba(0,212,255,0.15); }
-  .suggestion-tag.scope   { background: rgba(244,114,182,0.1); color: var(--pink);   border: 1px solid rgba(244,114,182,0.15); }
-  .suggestion-tag.max     { background: rgba(251,191,36,0.1);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.15); }
-  .suggestion-tag.browser { background: rgba(0,255,136,0.1);   color: var(--active); border: 1px solid rgba(0,255,136,0.15); }
-
-  .slot-footer { padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
-  .slot-label  { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--text); transition: color 0.2s; }
-  .slot-meta   { display: flex; align-items: center; gap: 6px; }
-  .slot-fps    { font-size: 9px; color: var(--text-dim); letter-spacing: 0.05em; }
-
-  .slot-tag        { font-size: 9px; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
-  .slot-tag.stream { background: rgba(0,255,136,0.1); color: var(--active); border: 1px solid rgba(0,255,136,0.2); }
-  .slot-tag.empty  { background: rgba(74,101,128,0.1); color: var(--text-dim); border: 1px solid rgba(74,101,128,0.15); }
-
-  .selected-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-  .slot.selected .selected-badge { opacity: 1; }
-  .selected-badge svg { width: 10px; height: 10px; }
-
-  .detail-panel { display: flex; flex-direction: column; background: var(--surface); }
-
-  .detail-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
-  .detail-video-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .detail-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
-  .detail-placeholder svg { opacity: 0.15; }
-  .detail-placeholder p { font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
-
-  .video-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 12px; background: linear-gradient(0deg,rgba(0,0,0,0.7) 0%,transparent 100%); display: flex; align-items: center; justify-content: space-between; opacity: 0; transition: opacity 0.2s; }
-  .detail-video-container:hover .video-overlay { opacity: 1; }
-
-  .live-badge { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--active); letter-spacing: 0.1em; font-weight: 700; }
-
-  .detail-info { padding: 16px; flex: 1; overflow-y: auto; }
-  .detail-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text-bright); letter-spacing: 0.05em; margin-bottom: 4px; }
-  .detail-endpoint { font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; margin-bottom: 16px; }
-  .detail-endpoint a { color: var(--accent); text-decoration: none; }
-
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-  .stat-card  { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; }
-  .stat-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
-  .stat-value { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-bright); line-height: 1; }
-  .stat-value.accent { color: var(--accent); }
-  .stat-value.active { color: var(--active); }
-  .stat-value.warn   { color: var(--warn); }
-
-  .detail-section-title { font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-
-  .endpoint-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
-  .endpoint-row  { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: var(--surface2); border-radius: 2px; border: 1px solid var(--border); }
-  .endpoint-path { font-size: 10px; color: var(--accent); letter-spacing: 0.03em; }
-  .endpoint-status     { font-size: 9px; letter-spacing: 0.05em; color: var(--text-dim); }
-  .endpoint-status.ok  { color: var(--active); }
-  .endpoint-status.err { color: var(--warn); }
-
-  .no-selection   { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: var(--text-dim); }
-  .no-selection p { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
-
-  .ws-log       { border-top: 1px solid var(--border); padding: 12px 16px; max-height: 140px; overflow-y: auto; }
-  .ws-log-title { font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
-  .log-line     { font-size: 10px; color: var(--text-dim); letter-spacing: 0.02em; line-height: 1.6; border-left: 2px solid var(--border); padding-left: 8px; margin-bottom: 3px; }
-  .log-line.info { border-left-color: var(--accent); color: var(--text); }
-  .log-line.ok   { border-left-color: var(--active); }
-  .log-line.err  { border-left-color: var(--warn); color: var(--warn); }
-
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
-  .explainer {
-    padding: 18px 28px;
-    border-bottom: 1px solid var(--border);
-    font-size: 11.5px;
-    line-height: 1.8;
-    color: var(--text-dim);
-    letter-spacing: 0.02em;
-    font-family: var(--font-mono);
-    background: linear-gradient(180deg, rgba(0,212,255,0.02) 0%, transparent 100%);
-  }
-  .ex-label { color: var(--text-bright); font-weight: 700; }
-  .ex-hi    { color: var(--accent); font-weight: 600; }
-  .ex-accent { color: var(--active); }
-  .explainer strong { color: var(--text); font-weight: 600; }
-
-  @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: auto; }
-    .detail-panel { border-top: 1px solid var(--border); max-height: 50vh; }
-    .fleet-panel  { border-right: none; }
-  }
+@media (max-width:900px) {
+  .fleet-layout { grid-template-columns:1fr; height:auto; }
+  .scenarios { grid-template-columns:1fr; }
+  .arch-cards { grid-template-columns:1fr; }
+  .tox-params { grid-template-columns:repeat(2,1fr); }
+  .tox-params-2col { grid-template-columns:1fr; }
+  header { flex-direction:column; gap:10px; align-items:flex-start; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">MAESTRA <span>// FLEET MGR</span></div>
-  <div class="header-status">
-    <div class="status-indicator">
-      <div class="dot connecting" id="ws-dot"></div>
-      <span id="ws-label">CONNECTING</span>
-    </div>
-    <div class="status-indicator">
-      <div class="dot" id="api-dot"></div>
-      <span id="api-label">API</span>
-    </div>
+  <div class="logo">Maestra <span>fleet manager for creative installations</span></div>
+  <div class="header-right">
+    <div class="status-pill"><div class="dot connecting" id="ws-dot"></div><span id="ws-label">CONNECTING</span></div>
+    <div class="status-pill"><div class="dot" id="api-dot"></div><span id="api-label">API</span></div>
     <div class="header-time" id="clock">--:--:--</div>
   </div>
 </header>
 
 <div class="explainer">
-  <span class="ex-label">What is Maestra?</span>
-  A centralized system built by <span class="ex-hi">Jordan Snyder</span> during her time as VP of Platform for all three of <span class="ex-hi">Meow Wolf</span>'s permanent installations, going open source soon. It manages all the devices in your installation. Imagine you have <span class="ex-accent">4 projectors, 2 audio zones</span>, and <span class="ex-accent">3 sensor stations</span> across a venue — Maestra lets every device <strong>register itself, sync its state</strong> (brightness, color, scene), <strong>advertise media streams</strong> (NDI, Syphon, Spout), and <strong>receive commands</strong> via OSC, WebSocket, or MQTT — all from one dashboard. Each device runs a tiny client (TouchDesigner, Max/MSP, Arduino, web browser) that talks to the Maestra server. This TouchDesigner TOX wraps the Maestra API so you can drop it into any TD project and connect in seconds.
+  <strong>What is Maestra?</strong> A centralized system built by <strong>Jordan Snyder</strong> during her time as VP of Platform for all three of <strong>Meow Wolf</strong>'s permanent installations — open source soon. It manages all the devices in your installation. Imagine you have <em>4 projectors, 2 audio zones</em>, and <em>3 sensor stations</em> across a venue — Maestra lets every device <strong>register itself, sync its state</strong> (brightness, color, scene), <strong>advertise media streams</strong> (NDI, Syphon, Spout), and <strong>receive commands</strong> via REST, WebSocket, or MQTT — all from one dashboard. Each device runs a tiny client (TouchDesigner, Max/MSP, Arduino, web browser) that talks to the Maestra server. The TouchDesigner TOX wraps the Maestra API so you can drop it into any TD project and connect in seconds.
 </div>
 
-<div class="main">
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('dashboard',this)">Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('scope',this)">Scope Integration</button>
+  <button class="tab-btn" onclick="switchTab('tox',this)">TOX Reference</button>
+</nav>
 
-  <div class="fleet-panel">
-    <div class="panel-header">
-      <div class="panel-title">// Fleet Slots</div>
-      <div class="entity-count" id="entity-count">0 entities</div>
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="fleet-layout">
+    <div class="fleet-panel">
+      <div class="panel-header">
+        <div class="panel-title-sm">// Fleet Slots</div>
+        <div class="entity-count" id="entity-count">0 entities</div>
+      </div>
+      <div class="slot-grid" id="slot-grid"></div>
     </div>
-    <div class="slot-grid" id="slot-grid"></div>
+    <div class="detail-panel">
+      <div class="detail-video-container" id="detail-video-container">
+        <div class="detail-placeholder" id="detail-placeholder">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <p>Select a slot</p>
+        </div>
+        <img id="detail-img" src="" style="display:none;" alt="Stream">
+        <div class="video-overlay">
+          <div class="live-badge"><div class="dot online"></div>Live</div>
+          <span id="overlay-fps" style="font-size:10px;color:rgba(255,255,255,0.5);"></span>
+        </div>
+      </div>
+      <div id="detail-content">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px;color:var(--text-dim);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">No slot selected</p>
+        </div>
+      </div>
+      <div class="ws-log">
+        <div class="ws-log-title">// WebSocket Log</div>
+        <div id="log-lines"></div>
+      </div>
+    </div>
   </div>
 
-  <div class="detail-panel" id="detail-panel">
-    <div class="detail-video-container" id="detail-video-container">
-      <div class="detail-placeholder" id="detail-placeholder">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        <p>Select a slot</p>
+  <!-- Use cases -->
+  <div class="use-cases">
+    <div class="section-title">// How You'd Use This</div>
+    <div class="scenarios">
+      <div class="scenario">
+        <span class="scenario-icon">🎛️</span>
+        <div class="scenario-title">Multi-Screen VJ Set</div>
+        <div class="scenario-desc">Each screen runs its own TD + Scope instance doing real-time AI generation. Maestra syncs scene changes, prompt updates, and color palettes across every machine. One state push switches the whole venue.</div>
       </div>
-      <img id="detail-img" src="" style="display:none;" alt="Stream preview">
-      <div class="video-overlay">
-        <div class="live-badge"><div class="dot online"></div>LIVE</div>
-        <span id="overlay-fps" style="font-size:10px;color:rgba(255,255,255,0.5);"></span>
+      <div class="scenario">
+        <span class="scenario-icon">🎭</span>
+        <div class="scenario-title">Gallery Installation</div>
+        <div class="scenario-desc">Register each station as an entity. Sync brightness based on time of day, coordinate color transitions, advertise NDI streams so curators can monitor every feed from a single dashboard.</div>
       </div>
-    </div>
-    <div id="detail-content">
-      <div class="no-selection" style="padding:32px;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        <p>No slot selected</p>
+      <div class="scenario">
+        <span class="scenario-icon">🏙️</span>
+        <div class="scenario-title">Festival Projection Mapping</div>
+        <div class="scenario-desc">Multiple building facades with different TD machines. Maestra manages scene changes across the fleet — one API call switches every projector to the next act. Heartbeats alert you if any machine drops.</div>
       </div>
-    </div>
-    <div class="ws-log">
-      <div class="ws-log-title">// WebSocket Log</div>
-      <div id="log-lines"></div>
     </div>
   </div>
 
+  <!-- Code block -->
+  <div class="code-block">
+    <span class="cmt"># In TouchDesigner — after dropping the Maestra TOX into your project:</span><br><br>
+    <span class="kw">maestra</span> = op(<span class="str">'maestra'</span>).ext.MaestraExt<br><br>
+    <span class="cmt"># Register this machine with the fleet</span><br>
+    maestra.<span class="fn">Connect</span>()&nbsp;&nbsp;<span class="cmt"># uses Entity ID + Server URL from custom pars</span><br><br>
+    <span class="cmt"># Push state — every connected client sees the update</span><br>
+    maestra.<span class="fn">UpdateState</span>({<span class="str">'brightness'</span>: <span class="num">75</span>, <span class="str">'scene'</span>: <span class="num">2</span>, <span class="str">'color'</span>: [<span class="num">0.8</span>, <span class="num">0.2</span>, <span class="num">1.0</span>]})<br><br>
+    <span class="cmt"># Advertise your NDI output so other machines can discover it</span><br>
+    maestra.<span class="fn">AdvertiseStream</span>(name=<span class="str">'Stage Visuals'</span>, stream_type=<span class="str">'ndi'</span>, protocol=<span class="str">'ndi'</span>)<br><br>
+    <span class="cmt"># From another machine — discover what's available</span><br>
+    streams = maestra.<span class="fn">ListStreams</span>(stream_type=<span class="str">'ndi'</span>)
+  </div>
 </div>
+
+<!-- ═══════════════════════ SCOPE INTEGRATION ═══════════════════════ -->
+<div id="tab-scope" class="tab-content">
+  <div class="arch-section">
+    <div class="arch-title">How Scope Fits In</div>
+    <div class="arch-subtitle">Scope runs on a single machine — it takes a video source and transforms it in real-time using AI diffusion models. Maestra runs across machines — it coordinates state and streams between devices. They solve different problems, and together they let you run coordinated AI-generated visuals across an entire venue.</div>
+    <div class="arch-diagram">
+<pre>
+  <span class="dim">┌────────────────────────────────────────────────────────────────────────────┐</span>
+  <span class="dim">│</span>                       <span class="node-maestra">MAESTRA SERVER</span>                                     <span class="dim">│</span>
+  <span class="dim">│</span>        state sync · stream registry · heartbeat monitor                  <span class="dim">│</span>
+  <span class="dim">│</span>             <span class="node-proto">REST API  ·  NATS  ·  MQTT  ·  WebSocket</span>                    <span class="dim">│</span>
+  <span class="dim">└──────────────┬─────────────────┬─────────────────┬──────────────────────┘</span>
+                <span class="dim">│</span>               <span class="dim">│</span>                 <span class="dim">│</span>
+  <span class="dim">┌─────────────▼───────┐ ┌───────▼──────────┐ ┌───────▼──────────┐</span>
+  <span class="dim">│</span> <span class="node-td">MACHINE A</span>            <span class="dim">│ │</span> <span class="node-td">MACHINE B</span>          <span class="dim">│ │</span> <span class="node-td">MACHINE C</span>          <span class="dim">│</span>
+  <span class="dim">│</span>                     <span class="dim">│ │</span>                   <span class="dim">│ │</span>                   <span class="dim">│</span>
+  <span class="dim">│</span>  <span class="node-scope">Scope</span>              <span class="dim">│ │</span>  <span class="node-scope">Scope</span>             <span class="dim">│ │</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">│</span>
+  <span class="dim">│</span>  <span class="dim">(AI diffusion)</span>     <span class="dim">│ │</span>  <span class="dim">(AI diffusion)</span>    <span class="dim">│ │</span>  <span class="dim">(generative)</span>     <span class="dim">│</span>
+  <span class="dim">│</span>      <span class="dim">│</span>              <span class="dim">│ │</span>      <span class="dim">│</span>             <span class="dim">│ │</span>                   <span class="dim">│</span>
+  <span class="dim">│</span>      <span class="node-stream">▼ NDI out</span>      <span class="dim">│ │</span>      <span class="node-stream">▼ NDI out</span>     <span class="dim">│ │</span>      <span class="node-stream">▼ NDI out</span>    <span class="dim">│</span>
+  <span class="dim">│</span>      <span class="dim">│</span>              <span class="dim">│ │</span>      <span class="dim">│</span>             <span class="dim">│ │</span>      <span class="dim">│</span>            <span class="dim">│</span>
+  <span class="dim">│</span>  <span class="node-td">TouchDesigner</span>     <span class="dim">│ │</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">│ │</span>  <span class="dim">projector out</span>    <span class="dim">│</span>
+  <span class="dim">│</span>  + <span class="node-maestra">Maestra TOX</span>     <span class="dim">│ │</span>  + <span class="node-maestra">Maestra TOX</span>    <span class="dim">│ │</span>  + <span class="node-maestra">Maestra TOX</span>   <span class="dim">│</span>
+  <span class="dim">│</span>  <span class="dim">projector out</span>     <span class="dim">│ │</span>  <span class="dim">projector out</span>    <span class="dim">│ │</span>                   <span class="dim">│</span>
+  <span class="dim">└─────────────────────┘ └───────────────────┘ └───────────────────┘</span>
+
+  <span class="cmt">What each layer does:</span>
+
+  <span class="node-scope">Scope</span>           Runs locally. Takes a video input, applies AI diffusion models
+                  (LongLive, StreamDiffusion, Krea Realtime), outputs transformed video.
+                  Outputs via <span class="node-stream">NDI</span> or screen capture. <span class="dim">No network coordination.</span>
+
+  <span class="node-td">TouchDesigner</span>   Receives Scope output via NDI In TOP. Composites, adds effects,
+                  maps to projector outputs. Runs the <span class="node-maestra">Maestra TOX</span>.
+
+  <span class="node-maestra">Maestra TOX</span>     Registers this machine with the fleet. Syncs state
+                  (scene, brightness, color, prompts) from the server.
+                  Advertises its NDI stream so other machines can discover it.
+
+  <span class="node-maestra">Maestra Server</span>  Central coordinator. One state change propagates to all
+                  connected entities. Monitors heartbeats. Maintains stream registry.
+</pre>
+    </div>
+    <div class="arch-cards">
+      <div class="arch-card">
+        <div class="arch-card-num">01</div>
+        <div class="arch-card-title">Scope Generates Locally</div>
+        <div class="arch-card-desc">Each machine runs Scope with its own GPU. Camera or media in, AI-transformed video out. Scope outputs via NDI — TouchDesigner picks it up with an <code>NDI In TOP</code>. Scope doesn't know about other machines. It doesn't need to.</div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-num">02</div>
+        <div class="arch-card-title">Maestra Coordinates the Fleet</div>
+        <div class="arch-card-desc">The TOX in each TD instance registers with the Maestra server. When you push a state change — <code>scene: 3</code>, <code>color: [0.8, 0.2, 1.0]</code> — every connected machine receives it. TD reads the new state and updates Scope's prompt, switches LoRAs, or adjusts post-processing.</div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-card-num">03</div>
+        <div class="arch-card-title">Streams Stay Discoverable</div>
+        <div class="arch-card-desc">Each machine advertises its NDI output through Maestra's stream registry. A monitor station can discover all streams on the network — no manual IP hunting. Heartbeats tell you instantly if a machine drops.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <span class="cmt"># Example: Maestra state change triggers Scope prompt update via OSC</span><br><br>
+    <span class="cmt"># In the Maestra TOX's par_exec callback:</span><br>
+    <span class="kw">def</span> <span class="fn">onValueChange</span>(par, prev):<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> par.name == <span class="str">'Scene'</span>:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scene = par.eval()<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prompts = {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="num">0</span>: <span class="str">'ethereal crystal cave, bioluminescent'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="num">1</span>: <span class="str">'baroque gold cathedral, dramatic lighting'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="num">2</span>: <span class="str">'neon cyberpunk rain, reflective surfaces'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cmt"># Send new prompt to Scope's local API or write to shared file</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;op(<span class="str">'scope_osc_out'</span>).sendOSC(<span class="str">'/scope/prompt'</span>, prompts.get(scene, <span class="str">''</span>))
+  </div>
+</div>
+
+<!-- ═══════════════════════ TOX REFERENCE ═══════════════════════ -->
+<div id="tab-tox" class="tab-content">
+  <div class="tox-section">
+    <div class="tox-title">Custom Parameters</div>
+    <div class="tox-params">
+      <div class="tox-param">
+        <div class="tox-param-title">Connection</div>
+        <div class="tox-param-list">
+          Entity ID<br>Server URL<br>API Key<br>Auto Connect<br>
+          Connect / Disconnect<br>Status (read-only)<br>Heartbeat Interval
+        </div>
+      </div>
+      <div class="tox-param">
+        <div class="tox-param-title">State</div>
+        <div class="tox-param-list">
+          Brightness (0–100)<br>Opacity (0–1)<br>Color (RGB)<br>
+          Speed (0–10)<br>Scene (int)<br>Custom State JSON<br>
+          Push / Pull State
+        </div>
+      </div>
+      <div class="tox-param">
+        <div class="tox-param-title">Streams</div>
+        <div class="tox-param-list">
+          Stream Name<br>Stream Type<br>
+          NDI / Syphon / Spout / RTMP / SRT / WebRTC<br>
+          Protocol<br>Address / Port<br>
+          Advertise / List Streams<br>Active Stream ID
+        </div>
+      </div>
+      <div class="tox-param">
+        <div class="tox-param-title">Gateways</div>
+        <div class="tox-param-list">
+          OSC In / Out Port<br>OSC Prefix<br>
+          WebSocket Enable / Port<br>
+          MQTT Enable / Broker / Port
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tox-section">
+    <div class="tox-title">Internal Operators</div>
+    <div class="tox-params-2col">
+      <div class="tox-param">
+        <div class="tox-param-title">MaestraExt</div>
+        <div class="tox-param-list">
+          Python extension with Connect(), Disconnect(), UpdateState(),
+          PushCurrentState(), PullState(), AdvertiseStream(), ListStreams(),
+          StreamHeartbeat(). Auto-connects on start if enabled. State params
+          auto-push on value change with debounce.
+        </div>
+      </div>
+      <div class="tox-param">
+        <div class="tox-param-title">Infrastructure</div>
+        <div class="tox-param-list">
+          heartbeat_timer — Timer CHOP, auto-heartbeat every N seconds<br>
+          par_exec — Parameter Execute DAT, handles pulses + auto-push<br>
+          log — Table DAT, rolling activity log (last 100 entries)<br>
+          streams_table — Table DAT, discovered streams<br>
+          info — Info CHOP, component monitoring
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <span class="cmt"># Quick start — after dropping the TOX into your project:</span><br><br>
+    <span class="cmt"># 1. Set your entity ID and server URL on the Connection page</span><br>
+    <span class="cmt"># 2. Pulse "Connect" (or enable Auto Connect)</span><br>
+    <span class="cmt"># 3. Adjust State parameters — they auto-push to server</span><br>
+    <span class="cmt"># 4. Advertise your NDI/Spout output on the Streams page</span><br><br>
+    <span class="cmt"># Or use Python:</span><br>
+    <span class="kw">maestra</span> = op(<span class="str">'maestra'</span>).ext.MaestraExt<br>
+    maestra.<span class="fn">UpdateState</span>({<span class="str">'brightness'</span>: <span class="num">50</span>, <span class="str">'scene'</span>: <span class="num">2</span>})<br>
+    maestra.<span class="fn">AdvertiseStream</span>(name=<span class="str">'My NDI'</span>, stream_type=<span class="str">'ndi'</span>)<br>
+    streams = maestra.<span class="fn">ListStreams</span>()<br><br>
+    <span class="cmt"># To save: Right-click the 'maestra' COMP > Save Component .tox</span>
+  </div>
+</div>
+
+<footer>
+  <div>Maestra — built by <a href="https://meowwolf.com" target="_blank">Jordan Snyder / Meow Wolf</a> · TouchDesigner TOX &amp; Fleet Manager by <a href="https://krista.art" target="_blank">Krista Faist</a> · 2026</div>
+  <div><a href="https://maestra-dashboard-production.up.railway.app/" target="_blank">The Mirror's Echo →</a></div>
+</footer>
 
 <script>
 const API_BASE = 'https://maestra-dashboard-production.up.railway.app';
 const WS_URL   = API_BASE.replace('https','wss') + '/ws';
 
 const SUGGESTIONS = [
-  { title: 'Second Screen',    desc: 'Drop the Maestra TOX into another TD project, point it at this server.',  tag: 'td',      tagLabel: 'TouchDesigner' },
-  { title: 'Scope Node',       desc: 'Run Scope on any GPU machine, pipe output into TD via NDI In TOP.',       tag: 'scope',   tagLabel: 'Scope + TD' },
-  { title: 'Audio Reactive',   desc: 'Connect Max/MSP or Ableton — send OSC state to the Maestra server.',     tag: 'max',     tagLabel: 'Max/MSP' },
-  { title: 'Monitor Station',  desc: 'Open this dashboard in another browser tab — it auto-registers.',        tag: 'browser', tagLabel: 'Browser' },
-  { title: 'Standby Node',     desc: 'Warm TD instance ready to take over if primary drops.',                  tag: 'td',      tagLabel: 'TouchDesigner' },
+  { title:'Second Screen',   desc:'Drop the Maestra TOX into another TD project, point it at this server.',    tag:'td',      tagLabel:'TouchDesigner' },
+  { title:'Scope Node',      desc:'Run Scope on any GPU machine, pipe output into TD via NDI In TOP.',          tag:'scope',   tagLabel:'Scope + TD' },
+  { title:'Audio Reactive',  desc:'Connect Max/MSP or Ableton — send OSC state changes to the Maestra server.',tag:'max',     tagLabel:'Max/MSP' },
+  { title:'Monitor Station', desc:'Open this dashboard in another browser tab — it auto-registers.',            tag:'browser', tagLabel:'Browser' },
+  { title:'Standby Node',    desc:'Warm TD instance ready to take over if the primary machine drops.',          tag:'td',      tagLabel:'TouchDesigner' },
 ];
 
 let slots = [
-  { id: 'krista1', label: 'Krista1', endpoint: '/video/frame/td', active: true,  fps: null, frameUrl: null, _frameTimes: [], _fpsSmooth: null },
-  { id: 'slot2',   label: 'Slot 2',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[0] },
-  { id: 'slot3',   label: 'Slot 3',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[1] },
-  { id: 'slot4',   label: 'Slot 4',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[2] },
-  { id: 'slot5',   label: 'Slot 5',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[3] },
-  { id: 'slot6',   label: 'Slot 6',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[4] },
+  { id:'krista1', label:'Krista1', endpoint:'/video/frame/td', active:true,  fps:null, frameUrl:null, _frameTimes:[], _fpsSmooth:null },
+  { id:'slot2',   label:'Slot 2',  endpoint:null, active:false, fps:null, frameUrl:null, _frameTimes:[], suggestion:SUGGESTIONS[0] },
+  { id:'slot3',   label:'Slot 3',  endpoint:null, active:false, fps:null, frameUrl:null, _frameTimes:[], suggestion:SUGGESTIONS[1] },
+  { id:'slot4',   label:'Slot 4',  endpoint:null, active:false, fps:null, frameUrl:null, _frameTimes:[], suggestion:SUGGESTIONS[2] },
+  { id:'slot5',   label:'Slot 5',  endpoint:null, active:false, fps:null, frameUrl:null, _frameTimes:[], suggestion:SUGGESTIONS[3] },
+  { id:'slot6',   label:'Slot 6',  endpoint:null, active:false, fps:null, frameUrl:null, _frameTimes:[], suggestion:SUGGESTIONS[4] },
 ];
+let selectedId=null, ws=null, frameInterval=null, wsReconnectTimer=null, slotsInitialized=false;
 
-let selectedId = null;
-let ws = null;
-let frameInterval = null;
-let entityData = null;
-let wsReconnectTimer = null;
-let slotsInitialized = false;
+function updateClock() { document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8); }
+setInterval(updateClock,1000); updateClock();
 
-function updateClock() {
-  document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-function log(msg, type='info') {
-  const el = document.getElementById('log-lines');
-  const line = document.createElement('div');
-  line.className = `log-line ${type}`;
-  line.textContent = `[${new Date().toTimeString().slice(0,8)}] ${msg}`;
-  el.prepend(line);
-  while (el.children.length > 30) el.removeChild(el.lastChild);
+function log(msg,type='info') {
+  const el=document.getElementById('log-lines');
+  const line=document.createElement('div'); line.className=`log-line ${type}`;
+  line.textContent=`[${new Date().toTimeString().slice(0,8)}] ${msg}`;
+  el.prepend(line); while(el.children.length>30) el.removeChild(el.lastChild);
 }
 
 function _slotHTML(slot) {
   let videoContent;
-  if (slot.active) {
+  if(slot.active) {
     videoContent = slot.frameUrl
       ? `<img src="${slot.frameUrl}" alt="stream">`
-      : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;color:var(--text-dim);letter-spacing:.1em;">CONNECTING</span></div>`;
+      : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);">Connecting</span></div>`;
   } else {
-    const s = slot.suggestion;
-    videoContent = `<div class="slot-suggestion">
+    const s=slot.suggestion;
+    videoContent=`<div class="slot-suggestion">
       <div class="suggestion-eyebrow">// connect a node</div>
       <div class="suggestion-title">${s.title}</div>
       <div class="suggestion-desc">${s.desc}</div>
       <span class="suggestion-tag ${s.tag}">${s.tagLabel}</span>
     </div>`;
   }
-  const tag = slot.active
-    ? `<span class="slot-tag stream">LIVE</span>`
-    : `<span class="slot-tag empty">OPEN</span>`;
+  const tag = slot.active ? `<span class="slot-tag stream">Live</span>` : `<span class="slot-tag empty">Open</span>`;
   return `
     <div class="slot-video-area">${videoContent}</div>
     <div class="slot-footer">
       <div class="slot-label">${slot.label}</div>
-      <div class="slot-meta"><span class="slot-fps">${slot.fps != null ? slot.fps+'fps' : ''}</span>${tag}</div>
+      <div class="slot-meta"><span class="slot-fps">${slot.fps!=null?slot.fps+'fps':''}</span>${tag}</div>
     </div>
-    <div class="selected-badge">
-      <svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
-    </div>`;
+    <div class="selected-badge"><svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>`;
 }
 
 function renderSlots() {
-  const grid = document.getElementById('slot-grid');
-  if (!slotsInitialized) {
-    grid.innerHTML = '';
+  const grid=document.getElementById('slot-grid');
+  if(!slotsInitialized) {
+    grid.innerHTML='';
     slots.forEach(slot => {
-      const el = document.createElement('div');
-      el.className = 'slot' + (slot.active ? ' active-slot' : '') + (slot.id === selectedId ? ' selected' : '');
-      el.dataset.id = slot.id;
-      el.onclick = () => selectSlot(slot.id);
-      el.innerHTML = _slotHTML(slot);
-      grid.appendChild(el);
+      const el=document.createElement('div');
+      el.className='slot'+(slot.active?' active-slot':'')+(slot.id===selectedId?' selected':'');
+      el.dataset.id=slot.id; el.onclick=()=>selectSlot(slot.id);
+      el.innerHTML=_slotHTML(slot); grid.appendChild(el);
     });
-    slotsInitialized = true;
-    return;
+    slotsInitialized=true; return;
   }
   slots.forEach(slot => {
-    const el = grid.querySelector(`[data-id="${slot.id}"]`);
-    if (!el) return;
-    el.classList.toggle('selected', slot.id === selectedId);
-    if (!slot.active) return;
-    let img = el.querySelector('.slot-video-area img');
-    if (slot.frameUrl) {
-      if (img) {
-        if (img.getAttribute('src') !== slot.frameUrl) img.setAttribute('src', slot.frameUrl);
-      } else {
-        el.querySelector('.slot-video-area').innerHTML = `<img src="${slot.frameUrl}" alt="stream">`;
-      }
+    const el=grid.querySelector(`[data-id="${slot.id}"]`);
+    if(!el) return;
+    el.classList.toggle('selected',slot.id===selectedId);
+    if(!slot.active) return;
+    let img=el.querySelector('.slot-video-area img');
+    if(slot.frameUrl) {
+      if(img) { if(img.getAttribute('src')!==slot.frameUrl) img.setAttribute('src',slot.frameUrl); }
+      else { el.querySelector('.slot-video-area').innerHTML=`<img src="${slot.frameUrl}" alt="stream">`; }
     }
-    const fpsEl = el.querySelector('.slot-fps');
-    if (fpsEl) fpsEl.textContent = slot.fps != null ? slot.fps+'fps' : '';
+    const fpsEl=el.querySelector('.slot-fps');
+    if(fpsEl) fpsEl.textContent=slot.fps!=null?slot.fps+'fps':'';
   });
 }
 
-function selectSlot(id) {
-  selectedId = id;
-  renderSlots();
-  renderDetail(slots.find(s => s.id === id));
-}
+function selectSlot(id) { selectedId=id; renderSlots(); renderDetail(slots.find(s=>s.id===id)); }
 
 function renderDetail(slot) {
-  const img = document.getElementById('detail-img');
-  const placeholder = document.getElementById('detail-placeholder');
-  const content = document.getElementById('detail-content');
-  const fpsOverlay = document.getElementById('overlay-fps');
-
-  if (slot.active && slot.frameUrl) {
-    img.src = slot.frameUrl;
-    img.style.display = 'block';
-    placeholder.style.display = 'none';
-    fpsOverlay.textContent = slot.fps ? `${slot.fps} FPS` : '';
-  } else if (slot.active) {
-    img.style.display = 'none';
-    placeholder.style.display = 'flex';
-    placeholder.innerHTML = `
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1">
-        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-      </svg><p>Loading stream...</p>`;
-    fpsOverlay.textContent = '';
+  const img=document.getElementById('detail-img');
+  const ph=document.getElementById('detail-placeholder');
+  const content=document.getElementById('detail-content');
+  const fpsOverlay=document.getElementById('overlay-fps');
+  if(slot.active && slot.frameUrl) {
+    img.src=slot.frameUrl; img.style.display='block'; ph.style.display='none';
+    fpsOverlay.textContent=slot.fps?`${slot.fps} FPS`:'';
+  } else if(slot.active) {
+    img.style.display='none'; ph.style.display='flex';
+    ph.innerHTML=`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><p>Loading stream...</p>`;
+    fpsOverlay.textContent='';
   } else {
-    img.style.display = 'none';
-    placeholder.style.display = 'flex';
-    placeholder.innerHTML = `
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6580" stroke-width="1">
-        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-      </svg><p>No Signal</p>`;
-    fpsOverlay.textContent = '';
+    img.style.display='none'; ph.style.display='flex';
+    ph.innerHTML=`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3a3a55" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><p>No Signal</p>`;
+    fpsOverlay.textContent='';
   }
-
-  if (slot.active) {
-    const endpointUrl = slot.endpoint ? `${API_BASE}${slot.endpoint}` : '—';
-    content.innerHTML = `
-      <div class="detail-info">
-        <div class="detail-name">${slot.label}</div>
-        <div class="detail-endpoint"><a href="${endpointUrl}" target="_blank">${endpointUrl}</a></div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">FPS</div>
-            <div class="stat-value active" id="detail-fps">${slot.fps ?? '—'}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Status</div>
-            <div class="stat-value accent">LIVE</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Endpoint</div>
-            <div class="stat-value" style="font-size:11px;color:var(--accent)">/video/frame/td</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Source</div>
-            <div class="stat-value" style="font-size:11px;">TouchDesigner</div>
-          </div>
-        </div>
-        <div class="detail-section-title">// API Endpoints</div>
-        <div class="endpoint-list">
-          <div class="endpoint-row"><span class="endpoint-path">/entities</span><span class="endpoint-status ok" id="ep-entities">OK</span></div>
-          <div class="endpoint-row"><span class="endpoint-path">/video/frame/td</span><span class="endpoint-status ok">STREAM</span></div>
-          <div class="endpoint-row"><span class="endpoint-path">/video/status</span><span class="endpoint-status" id="ep-status">—</span></div>
-          <div class="endpoint-row"><span class="endpoint-path">/ws</span><span class="endpoint-status" id="ep-ws">—</span></div>
-        </div>
-      </div>`;
+  if(slot.active) {
+    const eu=slot.endpoint?`${API_BASE}${slot.endpoint}`:'—';
+    content.innerHTML=`<div class="detail-info">
+      <div class="detail-name">${slot.label}</div>
+      <div class="detail-endpoint"><a href="${eu}" target="_blank">${eu}</a></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">FPS</div><div class="stat-value active" id="detail-fps">${slot.fps??'—'}</div></div>
+        <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value accent">Live</div></div>
+        <div class="stat-card"><div class="stat-label">Endpoint</div><div class="stat-value" style="font-size:10px;color:var(--accent)">/video/frame/td</div></div>
+        <div class="stat-card"><div class="stat-label">Source</div><div class="stat-value" style="font-size:11px;">TouchDesigner</div></div>
+      </div>
+      <div class="detail-section-title">// API Endpoints</div>
+      <div class="endpoint-list">
+        <div class="endpoint-row"><span class="endpoint-path">/entities</span><span class="endpoint-status ok" id="ep-entities">OK</span></div>
+        <div class="endpoint-row"><span class="endpoint-path">/video/frame/td</span><span class="endpoint-status ok">STREAM</span></div>
+        <div class="endpoint-row"><span class="endpoint-path">/video/status</span><span class="endpoint-status" id="ep-status">—</span></div>
+        <div class="endpoint-row"><span class="endpoint-path">/ws</span><span class="endpoint-status" id="ep-ws">—</span></div>
+      </div>
+    </div>`;
   } else {
-    const s = slot.suggestion;
-    content.innerHTML = `
-      <div class="detail-info" style="display:flex;flex-direction:column;gap:12px;padding:24px;">
-        <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-bright);">${s.title}</div>
-        <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">${s.desc}</div>
-        <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">
-          Connect a Maestra entity to activate this slot — set its Server URL to this deployment and give it a unique Entity ID.
-        </div>
-        <span class="suggestion-tag ${s.tag}" style="opacity:0.7;align-self:flex-start;">${s.tagLabel}</span>
-      </div>`;
+    const s=slot.suggestion;
+    content.innerHTML=`<div class="detail-info" style="display:flex;flex-direction:column;gap:12px;padding:24px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-bright);">${s.title}</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">${s.desc}</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">Connect a Maestra entity to activate this slot — set its Server URL to this deployment and give it a unique Entity ID.</div>
+      <span class="suggestion-tag ${s.tag}" style="opacity:0.7;align-self:flex-start;">${s.tagLabel}</span>
+    </div>`;
   }
 }
 
-// FPS: tight 1s window + exponential smoothing — calibrated for 15-18fps delivery
 async function fetchFrame() {
-  const slot = slots.find(s => s.id === 'krista1');
-  if (!slot) return;
+  const slot=slots.find(s=>s.id==='krista1');
+  if(!slot) return;
   try {
-    const res = await fetch(`${API_BASE}/video/frame/td?t=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    if (slot.frameUrl && slot.frameUrl.startsWith('blob:')) URL.revokeObjectURL(slot.frameUrl);
-    slot.frameUrl = url;
-
-    const now = performance.now();
+    const res=await fetch(`${API_BASE}/video/frame/td?t=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    if(slot.frameUrl && slot.frameUrl.startsWith('blob:')) URL.revokeObjectURL(slot.frameUrl);
+    slot.frameUrl=url;
+    const now=performance.now();
     slot._frameTimes.push(now);
-    // 1-second window — tight enough to track actual delivery rate
-    slot._frameTimes = slot._frameTimes.filter(t => now - t < 1000);
-    if (slot._frameTimes.length >= 2) {
-      const span = (slot._frameTimes[slot._frameTimes.length - 1] - slot._frameTimes[0]) / 1000;
-      const raw = (slot._frameTimes.length - 1) / span;
-      // Smooth: 60% inertia, 40% new reading — prevents single-frame jitter
-      slot._fpsSmooth = slot._fpsSmooth != null
-        ? slot._fpsSmooth * 0.6 + raw * 0.4
-        : raw;
-      slot.fps = Math.round(slot._fpsSmooth);
+    slot._frameTimes=slot._frameTimes.filter(t=>now-t<1000);
+    if(slot._frameTimes.length>=2) {
+      const span=(slot._frameTimes[slot._frameTimes.length-1]-slot._frameTimes[0])/1000;
+      const raw=(slot._frameTimes.length-1)/span;
+      slot._fpsSmooth=slot._fpsSmooth!=null?slot._fpsSmooth*0.6+raw*0.4:raw;
+      slot.fps=Math.round(slot._fpsSmooth);
     }
-
     renderSlots();
-    if (selectedId === 'krista1') {
-      const detailFps = document.getElementById('detail-fps');
-      if (detailFps) detailFps.textContent = slot.fps ?? '—';
-      const overlay = document.getElementById('overlay-fps');
-      if (overlay) overlay.textContent = slot.fps ? `${slot.fps} FPS` : '';
-      const di = document.getElementById('detail-img');
-      if (di && di.style.display !== 'none') di.src = slot.frameUrl;
+    if(selectedId==='krista1') {
+      const dfps=document.getElementById('detail-fps'); if(dfps) dfps.textContent=slot.fps??'—';
+      const ov=document.getElementById('overlay-fps'); if(ov) ov.textContent=slot.fps?`${slot.fps} FPS`:'';
+      const di=document.getElementById('detail-img'); if(di&&di.style.display!=='none') di.src=slot.frameUrl;
     }
-  } catch (e) { /* silently skip failed frames */ }
+  } catch(e) {}
 }
 
 async function fetchEntities() {
   try {
-    const res = await fetch(`${API_BASE}/entities`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    entityData = await res.json();
-    document.getElementById('api-dot').className = 'dot online';
-    document.getElementById('api-label').textContent = 'API OK';
-    document.getElementById('entity-count').textContent = `${slots.length} entities`;
-    log('Entities fetched: ' + JSON.stringify(entityData).slice(0,60), 'ok');
-  } catch (e) {
-    document.getElementById('api-dot').className = 'dot offline';
-    document.getElementById('api-label').textContent = 'API ERR';
-    log('Entity fetch failed: ' + e.message, 'err');
+    const res=await fetch(`${API_BASE}/entities`);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    document.getElementById('api-dot').className='dot online';
+    document.getElementById('api-label').textContent='API OK';
+    document.getElementById('entity-count').textContent=`${slots.length} entities`;
+    log('Entities fetched: '+JSON.stringify(data).slice(0,60),'ok');
+  } catch(e) {
+    document.getElementById('api-dot').className='dot offline';
+    document.getElementById('api-label').textContent='API ERR';
+    log('Entity fetch failed: '+e.message,'err');
   }
 }
 
 async function fetchVideoStatus() {
   try {
-    const res = await fetch(`${API_BASE}/video/status`);
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    const el = document.getElementById('ep-status');
-    if (el) { el.textContent = 'OK'; el.className = 'endpoint-status ok'; }
-  } catch (e) {
-    const el = document.getElementById('ep-status');
-    if (el) { el.textContent = 'ERR'; el.className = 'endpoint-status err'; }
+    const res=await fetch(`${API_BASE}/video/status`);
+    if(!res.ok) throw new Error(res.status);
+    const el=document.getElementById('ep-status');
+    if(el){el.textContent='OK';el.className='endpoint-status ok';}
+  } catch(e) {
+    const el=document.getElementById('ep-status');
+    if(el){el.textContent='ERR';el.className='endpoint-status err';}
   }
 }
 
 function connectWS() {
-  if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
-  log('Connecting to WebSocket...', 'info');
-  document.getElementById('ws-dot').className = 'dot connecting';
-  document.getElementById('ws-label').textContent = 'CONNECTING';
+  if(ws&&(ws.readyState===0||ws.readyState===1)) return;
+  log('Connecting to WebSocket...','info');
+  document.getElementById('ws-dot').className='dot connecting';
+  document.getElementById('ws-label').textContent='CONNECTING';
   try {
-    ws = new WebSocket(WS_URL);
-    ws.onopen = () => {
-      document.getElementById('ws-dot').className = 'dot online';
-      document.getElementById('ws-label').textContent = 'WS LIVE';
-      const el = document.getElementById('ep-ws');
-      if (el) { el.textContent = 'LIVE'; el.className = 'endpoint-status ok'; }
-      log('WebSocket connected', 'ok');
+    ws=new WebSocket(WS_URL);
+    ws.onopen=()=>{
+      document.getElementById('ws-dot').className='dot online';
+      document.getElementById('ws-label').textContent='WS LIVE';
+      const el=document.getElementById('ep-ws'); if(el){el.textContent='LIVE';el.className='endpoint-status ok';}
+      log('WebSocket connected','ok');
     };
-    ws.onmessage = (e) => {
+    ws.onmessage=(e)=>{
       try {
-        const msg = JSON.parse(e.data);
-        log('WS: ' + JSON.stringify(msg).slice(0,80), 'info');
-        if (msg.type === 'frame' && msg.data) {
-          const slot = slots.find(s => s.id === 'krista1');
-          if (slot) {
-            slot.frameUrl = 'data:image/jpeg;base64,' + msg.data;
-            renderSlots();
-            if (selectedId === 'krista1') renderDetail(slot);
-          }
+        const msg=JSON.parse(e.data);
+        log('WS: '+JSON.stringify(msg).slice(0,80),'info');
+        if(msg.type==='frame'&&msg.data) {
+          const slot=slots.find(s=>s.id==='krista1');
+          if(slot){slot.frameUrl='data:image/jpeg;base64,'+msg.data;renderSlots();if(selectedId==='krista1')renderDetail(slot);}
         }
-      } catch { log('WS raw: ' + String(e.data).slice(0,60)); }
+      } catch{ log('WS raw: '+String(e.data).slice(0,60)); }
     };
-    ws.onerror = () => log('WebSocket error', 'err');
-    ws.onclose = () => {
-      document.getElementById('ws-dot').className = 'dot offline';
-      document.getElementById('ws-label').textContent = 'WS OFF';
-      log('WebSocket disconnected, retrying in 5s...', 'err');
-      wsReconnectTimer = setTimeout(connectWS, 5000);
+    ws.onerror=()=>log('WebSocket error','err');
+    ws.onclose=()=>{
+      document.getElementById('ws-dot').className='dot offline';
+      document.getElementById('ws-label').textContent='WS OFF';
+      log('WebSocket disconnected, retrying in 5s...','err');
+      wsReconnectTimer=setTimeout(connectWS,5000);
     };
-  } catch (e) {
-    log('WS init failed: ' + e.message, 'err');
-    wsReconnectTimer = setTimeout(connectWS, 5000);
+  } catch(e) {
+    log('WS init failed: '+e.message,'err');
+    wsReconnectTimer=setTimeout(connectWS,5000);
   }
+}
+
+function switchTab(name,btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
 }
 
 renderSlots();
 fetchEntities();
 connectWS();
-
-// Poll at 55ms — faster than server delivery (~15-18fps = ~60ms/frame) so we never miss one
-frameInterval = setInterval(fetchFrame, 55);
-setInterval(fetchVideoStatus, 2000);
-setInterval(fetchEntities, 10000);
-
-setTimeout(() => selectSlot('krista1'), 200);
+frameInterval=setInterval(fetchFrame,55);
+setInterval(fetchVideoStatus,2000);
+setInterval(fetchEntities,10000);
+setTimeout(()=>selectSlot('krista1'),200);
 </script>
 </body>
 </html>
