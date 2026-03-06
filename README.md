@@ -163,11 +163,14 @@ The TOX can be password-protected in TouchDesigner:
 
 ## License
 
-MIT -- use freely, credit appreciated.
+- **Maestra framework** (Jordan Snyder / Meow Wolf) — MIT
+- **This TOX & fleet manager** (Krista Faist) — [AGPL 3.0](https://www.gnu.org/licenses/agpl-3.0.html)
+
+AGPL 3.0 means you can use, modify, and distribute freely — but any modified version you deploy as a network service must also be open source under AGPL. For commercial use without that requirement, dual-licensing is available — contact krista@krista.art.
 
 ## Credits
 
-- **Krista Faist** -- TOX development, fleet architecture
-- **Jordan Snyder / Meow Wolf** -- Maestra framework (MIT)
-- **Daydream / Livepeer** -- Scope, StreamDiffusion ecosystem
-- **DotSimulate** -- StreamDiffusionTD component
+- **Krista Faist** — TOX development, fleet architecture, fleet manager dashboard
+- **Jordan Snyder / Meow Wolf** — Maestra framework (MIT)
+- **Daydream / Livepeer** — Scope, StreamDiffusion ecosystem
+- **DotSimulate** — StreamDiffusionTD component
