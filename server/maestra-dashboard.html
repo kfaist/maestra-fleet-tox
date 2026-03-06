@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAESTRA // Fleet Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0d1117;
+    --surface2: #131a24;
+    --border: #1e2d3d;
+    --accent: #00d4ff;
+    --accent2: #7b2fff;
+    --active: #00ff88;
+    --warn: #ff6b35;
+    --text: #c8d8e8;
+    --text-dim: #4a6580;
+    --text-bright: #e8f4ff;
+    --slot-empty: #0a0f15;
+    --amber: #fbbf24;
+    --pink: #f472b6;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.015) 2px, rgba(0,212,255,0.015) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: 0.2em; color: var(--accent); text-shadow: 0 0 20px rgba(0,212,255,0.5); }
+  .logo span { color: var(--text-dim); font-weight: 400; }
+
+  .header-status { display: flex; align-items: center; gap: 24px; font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; }
+  .status-indicator { display: flex; align-items: center; gap: 6px; }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); transition: background 0.3s; }
+  .dot.online  { background: var(--active); box-shadow: 0 0 8px var(--active); animation: pulse 2s infinite; }
+  .dot.offline { background: var(--warn); }
+  .dot.connecting { background: var(--accent); animation: blink 1s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+  .header-time { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; }
+
+  .main { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 57px); }
+
+  .fleet-panel { padding: 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+
+  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .panel-title  { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
+  .entity-count { font-size: 10px; color: var(--text-dim); background: var(--surface2); border: 1px solid var(--border); padding: 3px 8px; border-radius: 2px; letter-spacing: 0.05em; }
+
+  .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+
+  .slot {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    overflow: hidden; cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .slot:hover { border-color: rgba(0,212,255,0.3); box-shadow: 0 0 16px rgba(0,212,255,0.08); transform: translateY(-1px); }
+  .slot.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 20px rgba(0,212,255,0.15); }
+  .slot.active-slot .slot-label { color: var(--active); }
+
+  .slot-video-area { width: 100%; aspect-ratio: 16/9; background: var(--slot-empty); position: relative; overflow: hidden; }
+  .slot-video-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Suggestion cards for empty slots */
+  .slot-suggestion {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+    padding: 14px 16px; gap: 4px;
+  }
+  .suggestion-eyebrow { font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); opacity: 0.4; margin-bottom: 2px; }
+  .suggestion-title   { font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; opacity: 0.55; }
+  .suggestion-desc    { font-size: 9px; color: var(--text-dim); line-height: 1.5; opacity: 0.45; }
+  .suggestion-tag     { font-size: 8px; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-top: 4px; opacity: 0.4; }
+  .suggestion-tag.td      { background: rgba(0,212,255,0.1);   color: var(--accent); border: 1px solid rgba(0,212,255,0.15); }
+  .suggestion-tag.scope   { background: rgba(244,114,182,0.1); color: var(--pink);   border: 1px solid rgba(244,114,182,0.15); }
+  .suggestion-tag.max     { background: rgba(251,191,36,0.1);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.15); }
+  .suggestion-tag.browser { background: rgba(0,255,136,0.1);   color: var(--active); border: 1px solid rgba(0,255,136,0.15); }
+
+  .slot-footer { padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
+  .slot-label  { font-family: var(--font-display); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--text); transition: color 0.2s; }
+  .slot-meta   { display: flex; align-items: center; gap: 6px; }
+  .slot-fps    { font-size: 9px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+  .slot-tag        { font-size: 9px; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
+  .slot-tag.stream { background: rgba(0,255,136,0.1); color: var(--active); border: 1px solid rgba(0,255,136,0.2); }
+  .slot-tag.empty  { background: rgba(74,101,128,0.1); color: var(--text-dim); border: 1px solid rgba(74,101,128,0.15); }
+
+  .selected-badge { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+  .slot.selected .selected-badge { opacity: 1; }
+  .selected-badge svg { width: 10px; height: 10px; }
+
+  .detail-panel { display: flex; flex-direction: column; background: var(--surface); }
+
+  .detail-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+  .detail-video-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .detail-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  .detail-placeholder svg { opacity: 0.15; }
+  .detail-placeholder p { font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .video-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 12px; background: linear-gradient(0deg,rgba(0,0,0,0.7) 0%,transparent 100%); display: flex; align-items: center; justify-content: space-between; opacity: 0; transition: opacity 0.2s; }
+  .detail-video-container:hover .video-overlay { opacity: 1; }
+
+  .live-badge { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--active); letter-spacing: 0.1em; font-weight: 700; }
+
+  .detail-info { padding: 16px; flex: 1; overflow-y: auto; }
+  .detail-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text-bright); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .detail-endpoint { font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; margin-bottom: 16px; }
+  .detail-endpoint a { color: var(--accent); text-decoration: none; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .stat-card  { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; }
+  .stat-label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .stat-value { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-bright); line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.active { color: var(--active); }
+  .stat-value.warn   { color: var(--warn); }
+
+  .detail-section-title { font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  .endpoint-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+  .endpoint-row  { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: var(--surface2); border-radius: 2px; border: 1px solid var(--border); }
+  .endpoint-path { font-size: 10px; color: var(--accent); letter-spacing: 0.03em; }
+  .endpoint-status     { font-size: 9px; letter-spacing: 0.05em; color: var(--text-dim); }
+  .endpoint-status.ok  { color: var(--active); }
+  .endpoint-status.err { color: var(--warn); }
+
+  .no-selection   { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; color: var(--text-dim); }
+  .no-selection p { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .ws-log       { border-top: 1px solid var(--border); padding: 12px 16px; max-height: 140px; overflow-y: auto; }
+  .ws-log-title { font-size: 9px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+  .log-line     { font-size: 10px; color: var(--text-dim); letter-spacing: 0.02em; line-height: 1.6; border-left: 2px solid var(--border); padding-left: 8px; margin-bottom: 3px; }
+  .log-line.info { border-left-color: var(--accent); color: var(--text); }
+  .log-line.ok   { border-left-color: var(--active); }
+  .log-line.err  { border-left-color: var(--warn); color: var(--warn); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: auto; }
+    .detail-panel { border-top: 1px solid var(--border); max-height: 50vh; }
+    .fleet-panel  { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MAESTRA <span>// FLEET MGR</span></div>
+  <div class="header-status">
+    <div class="status-indicator">
+      <div class="dot connecting" id="ws-dot"></div>
+      <span id="ws-label">CONNECTING</span>
+    </div>
+    <div class="status-indicator">
+      <div class="dot" id="api-dot"></div>
+      <span id="api-label">API</span>
+    </div>
+    <div class="header-time" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="fleet-panel">
+    <div class="panel-header">
+      <div class="panel-title">// Fleet Slots</div>
+      <div class="entity-count" id="entity-count">0 entities</div>
+    </div>
+    <div class="slot-grid" id="slot-grid"></div>
+  </div>
+
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-video-container" id="detail-video-container">
+      <div class="detail-placeholder" id="detail-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <p>Select a slot</p>
+      </div>
+      <img id="detail-img" src="" style="display:none;" alt="Stream preview">
+      <div class="video-overlay">
+        <div class="live-badge"><div class="dot online"></div>LIVE</div>
+        <span id="overlay-fps" style="font-size:10px;color:rgba(255,255,255,0.5);"></span>
+      </div>
+    </div>
+    <div id="detail-content">
+      <div class="no-selection" style="padding:32px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p>No slot selected</p>
+      </div>
+    </div>
+    <div class="ws-log">
+      <div class="ws-log-title">// WebSocket Log</div>
+      <div id="log-lines"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = 'https://maestra-dashboard-production.up.railway.app';
+const WS_URL   = API_BASE.replace('https','wss') + '/ws';
+
+const SUGGESTIONS = [
+  { title: 'Second Screen',    desc: 'Drop the Maestra TOX into another TD project, point it at this server.',  tag: 'td',      tagLabel: 'TouchDesigner' },
+  { title: 'Scope Node',       desc: 'Run Scope on any GPU machine, pipe output into TD via NDI In TOP.',       tag: 'scope',   tagLabel: 'Scope + TD' },
+  { title: 'Audio Reactive',   desc: 'Connect Max/MSP or Ableton — send OSC state to the Maestra server.',     tag: 'max',     tagLabel: 'Max/MSP' },
+  { title: 'Monitor Station',  desc: 'Open this dashboard in another browser tab — it auto-registers.',        tag: 'browser', tagLabel: 'Browser' },
+  { title: 'Standby Node',     desc: 'Warm TD instance ready to take over if primary drops.',                  tag: 'td',      tagLabel: 'TouchDesigner' },
+];
+
+let slots = [
+  { id: 'krista1', label: 'Krista1', endpoint: '/video/frame/td', active: true,  fps: null, frameUrl: null, _frameTimes: [], _fpsSmooth: null },
+  { id: 'slot2',   label: 'Slot 2',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[0] },
+  { id: 'slot3',   label: 'Slot 3',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[1] },
+  { id: 'slot4',   label: 'Slot 4',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[2] },
+  { id: 'slot5',   label: 'Slot 5',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[3] },
+  { id: 'slot6',   label: 'Slot 6',  endpoint: null, active: false, fps: null, frameUrl: null, _frameTimes: [], suggestion: SUGGESTIONS[4] },
+];
+
+let selectedId = null;
+let ws = null;
+let frameInterval = null;
+let entityData = null;
+let wsReconnectTimer = null;
+let slotsInitialized = false;
+
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function log(msg, type='info') {
+  const el = document.getElementById('log-lines');
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  line.textContent = `[${new Date().toTimeString().slice(0,8)}] ${msg}`;
+  el.prepend(line);
+  while (el.children.length > 30) el.removeChild(el.lastChild);
+}
+
+function _slotHTML(slot) {
+  let videoContent;
+  if (slot.active) {
+    videoContent = slot.frameUrl
+      ? `<img src="${slot.frameUrl}" alt="stream">`
+      : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;color:var(--text-dim);letter-spacing:.1em;">CONNECTING</span></div>`;
+  } else {
+    const s = slot.suggestion;
+    videoContent = `<div class="slot-suggestion">
+      <div class="suggestion-eyebrow">// connect a node</div>
+      <div class="suggestion-title">${s.title}</div>
+      <div class="suggestion-desc">${s.desc}</div>
+      <span class="suggestion-tag ${s.tag}">${s.tagLabel}</span>
+    </div>`;
+  }
+  const tag = slot.active
+    ? `<span class="slot-tag stream">LIVE</span>`
+    : `<span class="slot-tag empty">OPEN</span>`;
+  return `
+    <div class="slot-video-area">${videoContent}</div>
+    <div class="slot-footer">
+      <div class="slot-label">${slot.label}</div>
+      <div class="slot-meta"><span class="slot-fps">${slot.fps != null ? slot.fps+'fps' : ''}</span>${tag}</div>
+    </div>
+    <div class="selected-badge">
+      <svg viewBox="0 0 10 10" fill="none" stroke="#000" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>
+    </div>`;
+}
+
+function renderSlots() {
+  const grid = document.getElementById('slot-grid');
+  if (!slotsInitialized) {
+    grid.innerHTML = '';
+    slots.forEach(slot => {
+      const el = document.createElement('div');
+      el.className = 'slot' + (slot.active ? ' active-slot' : '') + (slot.id === selectedId ? ' selected' : '');
+      el.dataset.id = slot.id;
+      el.onclick = () => selectSlot(slot.id);
+      el.innerHTML = _slotHTML(slot);
+      grid.appendChild(el);
+    });
+    slotsInitialized = true;
+    return;
+  }
+  slots.forEach(slot => {
+    const el = grid.querySelector(`[data-id="${slot.id}"]`);
+    if (!el) return;
+    el.classList.toggle('selected', slot.id === selectedId);
+    if (!slot.active) return;
+    let img = el.querySelector('.slot-video-area img');
+    if (slot.frameUrl) {
+      if (img) {
+        if (img.getAttribute('src') !== slot.frameUrl) img.setAttribute('src', slot.frameUrl);
+      } else {
+        el.querySelector('.slot-video-area').innerHTML = `<img src="${slot.frameUrl}" alt="stream">`;
+      }
+    }
+    const fpsEl = el.querySelector('.slot-fps');
+    if (fpsEl) fpsEl.textContent = slot.fps != null ? slot.fps+'fps' : '';
+  });
+}
+
+function selectSlot(id) {
+  selectedId = id;
+  renderSlots();
+  renderDetail(slots.find(s => s.id === id));
+}
+
+function renderDetail(slot) {
+  const img = document.getElementById('detail-img');
+  const placeholder = document.getElementById('detail-placeholder');
+  const content = document.getElementById('detail-content');
+  const fpsOverlay = document.getElementById('overlay-fps');
+
+  if (slot.active && slot.frameUrl) {
+    img.src = slot.frameUrl;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    fpsOverlay.textContent = slot.fps ? `${slot.fps} FPS` : '';
+  } else if (slot.active) {
+    img.style.display = 'none';
+    placeholder.style.display = 'flex';
+    placeholder.innerHTML = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg><p>Loading stream...</p>`;
+    fpsOverlay.textContent = '';
+  } else {
+    img.style.display = 'none';
+    placeholder.style.display = 'flex';
+    placeholder.innerHTML = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6580" stroke-width="1">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg><p>No Signal</p>`;
+    fpsOverlay.textContent = '';
+  }
+
+  if (slot.active) {
+    const endpointUrl = slot.endpoint ? `${API_BASE}${slot.endpoint}` : '—';
+    content.innerHTML = `
+      <div class="detail-info">
+        <div class="detail-name">${slot.label}</div>
+        <div class="detail-endpoint"><a href="${endpointUrl}" target="_blank">${endpointUrl}</a></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value active" id="detail-fps">${slot.fps ?? '—'}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div class="stat-value accent">LIVE</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Endpoint</div>
+            <div class="stat-value" style="font-size:11px;color:var(--accent)">/video/frame/td</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Source</div>
+            <div class="stat-value" style="font-size:11px;">TouchDesigner</div>
+          </div>
+        </div>
+        <div class="detail-section-title">// API Endpoints</div>
+        <div class="endpoint-list">
+          <div class="endpoint-row"><span class="endpoint-path">/entities</span><span class="endpoint-status ok" id="ep-entities">OK</span></div>
+          <div class="endpoint-row"><span class="endpoint-path">/video/frame/td</span><span class="endpoint-status ok">STREAM</span></div>
+          <div class="endpoint-row"><span class="endpoint-path">/video/status</span><span class="endpoint-status" id="ep-status">—</span></div>
+          <div class="endpoint-row"><span class="endpoint-path">/ws</span><span class="endpoint-status" id="ep-ws">—</span></div>
+        </div>
+      </div>`;
+  } else {
+    const s = slot.suggestion;
+    content.innerHTML = `
+      <div class="detail-info" style="display:flex;flex-direction:column;gap:12px;padding:24px;">
+        <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-bright);">${s.title}</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">${s.desc}</div>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">
+          Connect a Maestra entity to activate this slot — set its Server URL to this deployment and give it a unique Entity ID.
+        </div>
+        <span class="suggestion-tag ${s.tag}" style="opacity:0.7;align-self:flex-start;">${s.tagLabel}</span>
+      </div>`;
+  }
+}
+
+// FPS: tight 1s window + exponential smoothing — calibrated for 15-18fps delivery
+async function fetchFrame() {
+  const slot = slots.find(s => s.id === 'krista1');
+  if (!slot) return;
+  try {
+    const res = await fetch(`${API_BASE}/video/frame/td?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    if (slot.frameUrl && slot.frameUrl.startsWith('blob:')) URL.revokeObjectURL(slot.frameUrl);
+    slot.frameUrl = url;
+
+    const now = performance.now();
+    slot._frameTimes.push(now);
+    // 1-second window — tight enough to track actual delivery rate
+    slot._frameTimes = slot._frameTimes.filter(t => now - t < 1000);
+    if (slot._frameTimes.length >= 2) {
+      const span = (slot._frameTimes[slot._frameTimes.length - 1] - slot._frameTimes[0]) / 1000;
+      const raw = (slot._frameTimes.length - 1) / span;
+      // Smooth: 60% inertia, 40% new reading — prevents single-frame jitter
+      slot._fpsSmooth = slot._fpsSmooth != null
+        ? slot._fpsSmooth * 0.6 + raw * 0.4
+        : raw;
+      slot.fps = Math.round(slot._fpsSmooth);
+    }
+
+    renderSlots();
+    if (selectedId === 'krista1') {
+      const detailFps = document.getElementById('detail-fps');
+      if (detailFps) detailFps.textContent = slot.fps ?? '—';
+      const overlay = document.getElementById('overlay-fps');
+      if (overlay) overlay.textContent = slot.fps ? `${slot.fps} FPS` : '';
+      const di = document.getElementById('detail-img');
+      if (di && di.style.display !== 'none') di.src = slot.frameUrl;
+    }
+  } catch (e) { /* silently skip failed frames */ }
+}
+
+async function fetchEntities() {
+  try {
+    const res = await fetch(`${API_BASE}/entities`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    entityData = await res.json();
+    document.getElementById('api-dot').className = 'dot online';
+    document.getElementById('api-label').textContent = 'API OK';
+    document.getElementById('entity-count').textContent = `${slots.length} entities`;
+    log('Entities fetched: ' + JSON.stringify(entityData).slice(0,60), 'ok');
+  } catch (e) {
+    document.getElementById('api-dot').className = 'dot offline';
+    document.getElementById('api-label').textContent = 'API ERR';
+    log('Entity fetch failed: ' + e.message, 'err');
+  }
+}
+
+async function fetchVideoStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/video/status`);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    const el = document.getElementById('ep-status');
+    if (el) { el.textContent = 'OK'; el.className = 'endpoint-status ok'; }
+  } catch (e) {
+    const el = document.getElementById('ep-status');
+    if (el) { el.textContent = 'ERR'; el.className = 'endpoint-status err'; }
+  }
+}
+
+function connectWS() {
+  if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+  log('Connecting to WebSocket...', 'info');
+  document.getElementById('ws-dot').className = 'dot connecting';
+  document.getElementById('ws-label').textContent = 'CONNECTING';
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+      document.getElementById('ws-dot').className = 'dot online';
+      document.getElementById('ws-label').textContent = 'WS LIVE';
+      const el = document.getElementById('ep-ws');
+      if (el) { el.textContent = 'LIVE'; el.className = 'endpoint-status ok'; }
+      log('WebSocket connected', 'ok');
+    };
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        log('WS: ' + JSON.stringify(msg).slice(0,80), 'info');
+        if (msg.type === 'frame' && msg.data) {
+          const slot = slots.find(s => s.id === 'krista1');
+          if (slot) {
+            slot.frameUrl = 'data:image/jpeg;base64,' + msg.data;
+            renderSlots();
+            if (selectedId === 'krista1') renderDetail(slot);
+          }
+        }
+      } catch { log('WS raw: ' + String(e.data).slice(0,60)); }
+    };
+    ws.onerror = () => log('WebSocket error', 'err');
+    ws.onclose = () => {
+      document.getElementById('ws-dot').className = 'dot offline';
+      document.getElementById('ws-label').textContent = 'WS OFF';
+      log('WebSocket disconnected, retrying in 5s...', 'err');
+      wsReconnectTimer = setTimeout(connectWS, 5000);
+    };
+  } catch (e) {
+    log('WS init failed: ' + e.message, 'err');
+    wsReconnectTimer = setTimeout(connectWS, 5000);
+  }
+}
+
+renderSlots();
+fetchEntities();
+connectWS();
+
+// Poll at 55ms — faster than server delivery (~15-18fps = ~60ms/frame) so we never miss one
+frameInterval = setInterval(fetchFrame, 55);
+setInterval(fetchVideoStatus, 2000);
+setInterval(fetchEntities, 10000);
+
+setTimeout(() => selectSlot('krista1'), 200);
+</script>
+</body>
+</html>

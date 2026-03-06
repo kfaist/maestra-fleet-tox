@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+*.toe
+*.toe.dir
+td_check.txt
+td_resp.txt
+td_check2.txt
+.DS_Store
+Thumbs.db
