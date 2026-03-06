@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MAESTRA — Fleet Manager for Creative Installations</title>
+<title>MAESTRA â€” Fleet Manager for Creative Installations</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -50,7 +50,7 @@ header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex;
 .tab-content { display:none; }
 .tab-content.active { display:block; }
 
-/* ── DASHBOARD TAB ── */
+/* â”€â”€ DASHBOARD TAB â”€â”€ */
 .fleet-layout { display:grid; grid-template-columns:1fr 340px; height:calc(100vh - 150px); }
 .fleet-panel { padding:24px; overflow-y:auto; border-right:1px solid var(--border); }
 .panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
@@ -121,7 +121,7 @@ header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex;
 .log-line.ok   { border-left-color:var(--active); }
 .log-line.err  { border-left-color:var(--warn); color:var(--warn); }
 
-/* ── USE CASES ── */
+/* â”€â”€ USE CASES â”€â”€ */
 .use-cases { padding:56px 28px 40px; border-top:1px solid var(--border); background:var(--surface); }
 .section-title { font-family:var(--font-display); font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); margin-bottom:20px; }
 .scenarios { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
@@ -137,7 +137,7 @@ header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex;
 .code-block .cmt { color:#2a3a4a; }
 .code-block .fn  { color:var(--text-bright); }
 
-/* ── SCOPE INTEGRATION TAB ── */
+/* â”€â”€ SCOPE INTEGRATION TAB â”€â”€ */
 .arch-section { padding:36px 28px; background:var(--bg); border-bottom:1px solid var(--border); }
 .arch-title { font-family:var(--font-display); font-size:13px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
 .arch-subtitle { font-size:12px; color:var(--text-dim); margin-bottom:24px; line-height:1.7; }
@@ -156,7 +156,7 @@ header { padding:14px 28px; border-bottom:1px solid var(--border); display:flex;
 .arch-card-desc  { font-size:11px; color:var(--text-dim); line-height:1.6; }
 .arch-card-desc code { background:rgba(0,212,255,0.08); color:var(--accent); padding:1px 5px; border-radius:3px; font-size:10px; }
 
-/* ── TOX REFERENCE TAB ── */
+/* â”€â”€ TOX REFERENCE TAB â”€â”€ */
 .tox-section { padding:28px; background:var(--bg); border-bottom:1px solid var(--border); }
 .tox-title { font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
 .tox-params { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
@@ -197,7 +197,7 @@ footer a:hover { text-decoration:underline; }
 </header>
 
 <div class="explainer">
-  <strong>What is Maestra?</strong> A centralized system built by <strong>Jordan Snyder</strong> during her time as VP of Platform for all three of <strong>Meow Wolf</strong>'s permanent installations: open source MIT. It manages all the devices in your installation. Imagine you have <em>4 projectors, 2 audio zones</em>, and <em>3 sensor stations</em> across a venue — Maestra lets every device <strong>register itself, sync its state</strong> (brightness, color, scene), <strong>advertise media streams</strong> (NDI, Syphon, Spout), and <strong>receive commands</strong> via REST, WebSocket, or MQTT — all from one dashboard. Each device runs a tiny client (TouchDesigner, Max/MSP, Arduino, web browser) that talks to the Maestra server. The TouchDesigner TOX wraps the Maestra API so you can drop it into any TD project and connect in seconds (in theory). <strong>This TOX addition is AGPL 3.0</strong> — dual-licensing available for commercial use.
+  <strong>What is Maestra?</strong> A centralized system built by <strong>Jordan Snyder</strong> during her time as VP of Platform for all three of <strong>Meow Wolf</strong>'s permanent installations: open source MIT. It manages all the devices in your installation. Imagine you have <em>4 projectors, 2 audio zones</em>, and <em>3 sensor stations</em> across a venue â€” Maestra lets every device <strong>register itself, sync its state</strong> (brightness, color, scene), <strong>advertise media streams</strong> (NDI, Syphon, Spout), and <strong>receive commands</strong> via REST, WebSocket, or MQTT â€” all from one dashboard. Each device runs a tiny client (TouchDesigner, Max/MSP, Arduino, web browser) that talks to the Maestra server. The TouchDesigner TOX wraps the Maestra API so you can drop it into any TD project and connect in seconds (in theory). <strong>This TOX &amp; Fleet Manager Dashboard are AGPL 3.0</strong> â€” dual-licensing available for commercial use.
 </div>
 
 <nav class="tab-nav">
@@ -206,7 +206,7 @@ footer a:hover { text-decoration:underline; }
   <button class="tab-btn" onclick="switchTab('tox',this)">TOX Reference</button>
 </nav>
 
-<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="tab-dashboard" class="tab-content active">
   <div class="fleet-layout">
     <div class="fleet-panel">
@@ -247,63 +247,63 @@ footer a:hover { text-decoration:underline; }
     <div class="section-title">// How You'd Use This</div>
     <div class="scenarios">
       <div class="scenario">
-        <span class="scenario-icon">🎛️</span>
+        <span class="scenario-icon">ðŸŽ›ï¸</span>
         <div class="scenario-title">Multi-Screen VJ Set</div>
         <div class="scenario-desc">Each screen runs its own TD + Scope instance doing real-time AI generation. Maestra syncs scene changes, prompt updates, and color palettes across every machine. One state push switches the whole venue.</div>
       </div>
       <div class="scenario">
-        <span class="scenario-icon">🎭</span>
+        <span class="scenario-icon">ðŸŽ­</span>
         <div class="scenario-title">Gallery Installation</div>
         <div class="scenario-desc">Register each station as an entity. Sync brightness based on time of day, coordinate color transitions, advertise NDI streams so curators can monitor every feed from a single dashboard.</div>
       </div>
       <div class="scenario">
-        <span class="scenario-icon">🏙️</span>
+        <span class="scenario-icon">ðŸ™ï¸</span>
         <div class="scenario-title">Festival Projection Mapping</div>
-        <div class="scenario-desc">Multiple building facades with different TD machines. Maestra manages scene changes across the fleet — one API call switches every projector to the next act. Heartbeats alert you if any machine drops.</div>
+        <div class="scenario-desc">Multiple building facades with different TD machines. Maestra manages scene changes across the fleet â€” one API call switches every projector to the next act. Heartbeats alert you if any machine drops.</div>
       </div>
     </div>
   </div>
 
   <!-- Code block -->
   <div class="code-block">
-    <span class="cmt"># In TouchDesigner — after dropping the Maestra TOX into your project:</span><br><br>
+    <span class="cmt"># In TouchDesigner â€” after dropping the Maestra TOX into your project:</span><br><br>
     <span class="kw">maestra</span> = op(<span class="str">'maestra'</span>).ext.MaestraExt<br><br>
     <span class="cmt"># Register this machine with the fleet</span><br>
     maestra.<span class="fn">Connect</span>()&nbsp;&nbsp;<span class="cmt"># uses Entity ID + Server URL from custom pars</span><br><br>
-    <span class="cmt"># Push state — every connected client sees the update</span><br>
+    <span class="cmt"># Push state â€” every connected client sees the update</span><br>
     maestra.<span class="fn">UpdateState</span>({<span class="str">'brightness'</span>: <span class="num">75</span>, <span class="str">'scene'</span>: <span class="num">2</span>, <span class="str">'color'</span>: [<span class="num">0.8</span>, <span class="num">0.2</span>, <span class="num">1.0</span>]})<br><br>
     <span class="cmt"># Advertise your NDI output so other machines can discover it</span><br>
     maestra.<span class="fn">AdvertiseStream</span>(name=<span class="str">'Stage Visuals'</span>, stream_type=<span class="str">'ndi'</span>, protocol=<span class="str">'ndi'</span>)<br><br>
-    <span class="cmt"># From another machine — discover what's available</span><br>
+    <span class="cmt"># From another machine â€” discover what's available</span><br>
     streams = maestra.<span class="fn">ListStreams</span>(stream_type=<span class="str">'ndi'</span>)
   </div>
 </div><!-- end tab-dashboard -->
 
-<!-- ═══════════════════════ SCOPE INTEGRATION ═══════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCOPE INTEGRATION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="tab-scope" class="tab-content">
   <div class="arch-section">
     <div class="arch-title">How Scope Fits In</div>
-    <div class="arch-subtitle">Scope runs on a single machine — it takes a video source and transforms it in real-time using AI diffusion models. Maestra runs across machines — it coordinates state and streams between devices. They solve different problems, and together they let you run coordinated AI-generated visuals across an entire venue.</div>
+    <div class="arch-subtitle">Scope runs on a single machine â€” it takes a video source and transforms it in real-time using AI diffusion models. Maestra runs across machines â€” it coordinates state and streams between devices. They solve different problems, and together they let you run coordinated AI-generated visuals across an entire venue.</div>
     <div class="arch-diagram">
 <pre>
-  <span class="dim">┌────────────────────────────────────────────────────────────────────────────┐</span>
-  <span class="dim">│</span>                       <span class="node-maestra">MAESTRA SERVER</span>                                     <span class="dim">│</span>
-  <span class="dim">│</span>        state sync · stream registry · heartbeat monitor                  <span class="dim">│</span>
-  <span class="dim">│</span>             <span class="node-proto">REST API  ·  NATS  ·  MQTT  ·  WebSocket</span>                    <span class="dim">│</span>
-  <span class="dim">└──────────────┬─────────────────┬─────────────────┬──────────────────────┘</span>
-                <span class="dim">│</span>               <span class="dim">│</span>                 <span class="dim">│</span>
-  <span class="dim">┌─────────────▼───────┐ ┌───────▼──────────┐ ┌───────▼──────────┐</span>
-  <span class="dim">│</span> <span class="node-td">MACHINE A</span>            <span class="dim">│ │</span> <span class="node-td">MACHINE B</span>          <span class="dim">│ │</span> <span class="node-td">MACHINE C</span>          <span class="dim">│</span>
-  <span class="dim">│</span>                     <span class="dim">│ │</span>                   <span class="dim">│ │</span>                   <span class="dim">│</span>
-  <span class="dim">│</span>  <span class="node-scope">Scope</span>              <span class="dim">│ │</span>  <span class="node-scope">Scope</span>             <span class="dim">│ │</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">│</span>
-  <span class="dim">│</span>  <span class="dim">(AI diffusion)</span>     <span class="dim">│ │</span>  <span class="dim">(AI diffusion)</span>    <span class="dim">│ │</span>  <span class="dim">(generative)</span>     <span class="dim">│</span>
-  <span class="dim">│</span>      <span class="dim">│</span>              <span class="dim">│ │</span>      <span class="dim">│</span>             <span class="dim">│ │</span>                   <span class="dim">│</span>
-  <span class="dim">│</span>      <span class="node-stream">▼ NDI out</span>      <span class="dim">│ │</span>      <span class="node-stream">▼ NDI out</span>     <span class="dim">│ │</span>      <span class="node-stream">▼ NDI out</span>    <span class="dim">│</span>
-  <span class="dim">│</span>      <span class="dim">│</span>              <span class="dim">│ │</span>      <span class="dim">│</span>             <span class="dim">│ │</span>      <span class="dim">│</span>            <span class="dim">│</span>
-  <span class="dim">│</span>  <span class="node-td">TouchDesigner</span>     <span class="dim">│ │</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">│ │</span>  <span class="dim">projector out</span>    <span class="dim">│</span>
-  <span class="dim">│</span>  + <span class="node-maestra">Maestra TOX</span>     <span class="dim">│ │</span>  + <span class="node-maestra">Maestra TOX</span>    <span class="dim">│ │</span>  + <span class="node-maestra">Maestra TOX</span>   <span class="dim">│</span>
-  <span class="dim">│</span>  <span class="dim">projector out</span>     <span class="dim">│ │</span>  <span class="dim">projector out</span>    <span class="dim">│ │</span>                   <span class="dim">│</span>
-  <span class="dim">└─────────────────────┘ └───────────────────┘ └───────────────────┘</span>
+  <span class="dim">â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”</span>
+  <span class="dim">â”‚</span>                       <span class="node-maestra">MAESTRA SERVER</span>                                     <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>        state sync Â· stream registry Â· heartbeat monitor                  <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>             <span class="node-proto">REST API  Â·  NATS  Â·  MQTT  Â·  WebSocket</span>                    <span class="dim">â”‚</span>
+  <span class="dim">â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜</span>
+                <span class="dim">â”‚</span>               <span class="dim">â”‚</span>                 <span class="dim">â”‚</span>
+  <span class="dim">â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”</span>
+  <span class="dim">â”‚</span> <span class="node-td">MACHINE A</span>            <span class="dim">â”‚ â”‚</span> <span class="node-td">MACHINE B</span>          <span class="dim">â”‚ â”‚</span> <span class="node-td">MACHINE C</span>          <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>                     <span class="dim">â”‚ â”‚</span>                   <span class="dim">â”‚ â”‚</span>                   <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>  <span class="node-scope">Scope</span>              <span class="dim">â”‚ â”‚</span>  <span class="node-scope">Scope</span>             <span class="dim">â”‚ â”‚</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>  <span class="dim">(AI diffusion)</span>     <span class="dim">â”‚ â”‚</span>  <span class="dim">(AI diffusion)</span>    <span class="dim">â”‚ â”‚</span>  <span class="dim">(generative)</span>     <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>      <span class="dim">â”‚</span>              <span class="dim">â”‚ â”‚</span>      <span class="dim">â”‚</span>             <span class="dim">â”‚ â”‚</span>                   <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>      <span class="node-stream">â–¼ NDI out</span>      <span class="dim">â”‚ â”‚</span>      <span class="node-stream">â–¼ NDI out</span>     <span class="dim">â”‚ â”‚</span>      <span class="node-stream">â–¼ NDI out</span>    <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>      <span class="dim">â”‚</span>              <span class="dim">â”‚ â”‚</span>      <span class="dim">â”‚</span>             <span class="dim">â”‚ â”‚</span>      <span class="dim">â”‚</span>            <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>  <span class="node-td">TouchDesigner</span>     <span class="dim">â”‚ â”‚</span>  <span class="node-td">TouchDesigner</span>    <span class="dim">â”‚ â”‚</span>  <span class="dim">projector out</span>    <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>  + <span class="node-maestra">Maestra TOX</span>     <span class="dim">â”‚ â”‚</span>  + <span class="node-maestra">Maestra TOX</span>    <span class="dim">â”‚ â”‚</span>  + <span class="node-maestra">Maestra TOX</span>   <span class="dim">â”‚</span>
+  <span class="dim">â”‚</span>  <span class="dim">projector out</span>     <span class="dim">â”‚ â”‚</span>  <span class="dim">projector out</span>    <span class="dim">â”‚ â”‚</span>                   <span class="dim">â”‚</span>
+  <span class="dim">â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜</span>
 
   <span class="cmt">What each layer does:</span>
 
@@ -326,17 +326,17 @@ footer a:hover { text-decoration:underline; }
       <div class="arch-card">
         <div class="arch-card-num">01</div>
         <div class="arch-card-title">Scope Generates Locally</div>
-        <div class="arch-card-desc">Each machine runs Scope with its own GPU. Camera or media in, AI-transformed video out. Scope outputs via NDI — TouchDesigner picks it up with an <code>NDI In TOP</code>. Scope doesn't know about other machines. It doesn't need to.</div>
+        <div class="arch-card-desc">Each machine runs Scope with its own GPU. Camera or media in, AI-transformed video out. Scope outputs via NDI â€” TouchDesigner picks it up with an <code>NDI In TOP</code>. Scope doesn't know about other machines. It doesn't need to.</div>
       </div>
       <div class="arch-card">
         <div class="arch-card-num">02</div>
         <div class="arch-card-title">Maestra Coordinates the Fleet</div>
-        <div class="arch-card-desc">The TOX in each TD instance registers with the Maestra server. When you push a state change — <code>scene: 3</code>, <code>color: [0.8, 0.2, 1.0]</code> — every connected machine receives it. TD reads the new state and updates Scope's prompt, switches LoRAs, or adjusts post-processing.</div>
+        <div class="arch-card-desc">The TOX in each TD instance registers with the Maestra server. When you push a state change â€” <code>scene: 3</code>, <code>color: [0.8, 0.2, 1.0]</code> â€” every connected machine receives it. TD reads the new state and updates Scope's prompt, switches LoRAs, or adjusts post-processing.</div>
       </div>
       <div class="arch-card">
         <div class="arch-card-num">03</div>
         <div class="arch-card-title">Streams Stay Discoverable</div>
-        <div class="arch-card-desc">Each machine advertises its NDI output through Maestra's stream registry. A monitor station can discover all streams on the network — no manual IP hunting. Heartbeats tell you instantly if a machine drops.</div>
+        <div class="arch-card-desc">Each machine advertises its NDI output through Maestra's stream registry. A monitor station can discover all streams on the network â€” no manual IP hunting. Heartbeats tell you instantly if a machine drops.</div>
       </div>
     </div>
   </div>
@@ -357,7 +357,7 @@ footer a:hover { text-decoration:underline; }
   </div>
 </div>
 
-<!-- ═══════════════════════ TOX REFERENCE ═══════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• TOX REFERENCE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="tab-tox" class="tab-content">
   <div class="tox-section">
     <div class="tox-title">Custom Parameters</div>
@@ -372,8 +372,8 @@ footer a:hover { text-decoration:underline; }
       <div class="tox-param">
         <div class="tox-param-title">State</div>
         <div class="tox-param-list">
-          Brightness (0–100)<br>Opacity (0–1)<br>Color (RGB)<br>
-          Speed (0–10)<br>Scene (int)<br>Custom State JSON<br>
+          Brightness (0â€“100)<br>Opacity (0â€“1)<br>Color (RGB)<br>
+          Speed (0â€“10)<br>Scene (int)<br>Custom State JSON<br>
           Push / Pull State
         </div>
       </div>
@@ -412,11 +412,11 @@ footer a:hover { text-decoration:underline; }
       <div class="tox-param">
         <div class="tox-param-title">Infrastructure</div>
         <div class="tox-param-list">
-          heartbeat_timer — Timer CHOP, auto-heartbeat every N seconds<br>
-          par_exec — Parameter Execute DAT, handles pulses + auto-push<br>
-          log — Table DAT, rolling activity log (last 100 entries)<br>
-          streams_table — Table DAT, discovered streams<br>
-          info — Info CHOP, component monitoring
+          heartbeat_timer â€” Timer CHOP, auto-heartbeat every N seconds<br>
+          par_exec â€” Parameter Execute DAT, handles pulses + auto-push<br>
+          log â€” Table DAT, rolling activity log (last 100 entries)<br>
+          streams_table â€” Table DAT, discovered streams<br>
+          info â€” Info CHOP, component monitoring
         </div>
       </div>
     </div>
@@ -443,10 +443,10 @@ footer a:hover { text-decoration:underline; }
   </div>
 
   <div class="code-block">
-    <span class="cmt"># Quick start — after dropping the TOX into your project:</span><br><br>
+    <span class="cmt"># Quick start â€” after dropping the TOX into your project:</span><br><br>
     <span class="cmt"># 1. Set your entity ID and server URL on the Connection page</span><br>
     <span class="cmt"># 2. Pulse "Connect" (or enable Auto Connect)</span><br>
-    <span class="cmt"># 3. Adjust State parameters — they auto-push to server</span><br>
+    <span class="cmt"># 3. Adjust State parameters â€” they auto-push to server</span><br>
     <span class="cmt"># 4. Advertise your NDI/Spout output on the Streams page</span><br><br>
     <span class="cmt"># Or use Python:</span><br>
     <span class="kw">maestra</span> = op(<span class="str">'maestra'</span>).ext.MaestraExt<br>
@@ -458,8 +458,8 @@ footer a:hover { text-decoration:underline; }
 </div>
 
 <footer>
-  <div>Maestra — built by <a href="https://meowwolf.com" target="_blank">Jordan Snyder / Meow Wolf</a> · TouchDesigner TOX &amp; Fleet Manager by <a href="https://krista.art" target="_blank">Krista Faist</a> · 2026</div>
-  <div><a href="https://maestra-dashboard-production.up.railway.app/" target="_blank">The Mirror's Echo →</a></div>
+  <div>Maestra â€” built by <a href="https://meowwolf.com" target="_blank">Jordan Snyder / Meow Wolf</a> Â· TouchDesigner TOX &amp; Fleet Manager by <a href="https://krista.art" target="_blank">Krista Faist</a> Â· 2026</div>
+  <div><a href="https://maestra-dashboard-production.up.railway.app/" target="_blank">The Mirror's Echo â†’</a></div>
 </footer>
 
 <script>
@@ -469,8 +469,8 @@ const WS_URL   = API_BASE.replace('https','wss') + '/ws';
 const SUGGESTIONS = [
   { title:'Second Screen',   desc:'Drop the Maestra TOX into another TD project, point it at this server.',    tag:'td',      tagLabel:'TouchDesigner' },
   { title:'Scope Node',      desc:'Run Scope on any GPU machine, pipe output into TD via NDI In TOP.',          tag:'scope',   tagLabel:'Scope + TD' },
-  { title:'Audio Reactive',  desc:'Connect Max/MSP or Ableton — send OSC state changes to the Maestra server.',tag:'max',     tagLabel:'Max/MSP' },
-  { title:'Monitor Station', desc:'Open this dashboard in another browser tab — it auto-registers.',            tag:'browser', tagLabel:'Browser' },
+  { title:'Audio Reactive',  desc:'Connect Max/MSP or Ableton â€” send OSC state changes to the Maestra server.',tag:'max',     tagLabel:'Max/MSP' },
+  { title:'Monitor Station', desc:'Open this dashboard in another browser tab â€” it auto-registers.',            tag:'browser', tagLabel:'Browser' },
   { title:'Standby Node',    desc:'Warm TD instance ready to take over if the primary machine drops.',          tag:'td',      tagLabel:'TouchDesigner' },
 ];
 
@@ -566,12 +566,12 @@ function renderDetail(slot) {
     fpsOverlay.textContent='';
   }
   if(slot.active) {
-    const eu=slot.endpoint?`${API_BASE}${slot.endpoint}`:'—';
+    const eu=slot.endpoint?`${API_BASE}${slot.endpoint}`:'â€”';
     content.innerHTML=`<div class="detail-info">
       <div class="detail-name">${slot.label}</div>
       <div class="detail-endpoint"><a href="${eu}" target="_blank">${eu}</a></div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">FPS</div><div class="stat-value active" id="detail-fps">${slot.fps??'—'}</div></div>
+        <div class="stat-card"><div class="stat-label">FPS</div><div class="stat-value active" id="detail-fps">${slot.fps??'â€”'}</div></div>
         <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value accent">Live</div></div>
         <div class="stat-card"><div class="stat-label">Endpoint</div><div class="stat-value" style="font-size:10px;color:var(--accent)">/video/frame/td</div></div>
         <div class="stat-card"><div class="stat-label">Source</div><div class="stat-value" style="font-size:11px;">TouchDesigner</div></div>
@@ -580,8 +580,8 @@ function renderDetail(slot) {
       <div class="endpoint-list">
         <div class="endpoint-row"><span class="endpoint-path">/entities</span><span class="endpoint-status ok" id="ep-entities">OK</span></div>
         <div class="endpoint-row"><span class="endpoint-path">/video/frame/td</span><span class="endpoint-status ok">STREAM</span></div>
-        <div class="endpoint-row"><span class="endpoint-path">/video/status</span><span class="endpoint-status" id="ep-status">—</span></div>
-        <div class="endpoint-row"><span class="endpoint-path">/ws</span><span class="endpoint-status" id="ep-ws">—</span></div>
+        <div class="endpoint-row"><span class="endpoint-path">/video/status</span><span class="endpoint-status" id="ep-status">â€”</span></div>
+        <div class="endpoint-row"><span class="endpoint-path">/ws</span><span class="endpoint-status" id="ep-ws">â€”</span></div>
       </div>
     </div>`;
   } else {
@@ -589,7 +589,7 @@ function renderDetail(slot) {
     content.innerHTML=`<div class="detail-info" style="display:flex;flex-direction:column;gap:12px;padding:24px;">
       <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-bright);">${s.title}</div>
       <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">${s.desc}</div>
-      <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">Connect a Maestra entity to activate this slot — set its Server URL to this deployment and give it a unique Entity ID.</div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.7;">Connect a Maestra entity to activate this slot â€” set its Server URL to this deployment and give it a unique Entity ID.</div>
       <span class="suggestion-tag ${s.tag}" style="opacity:0.7;align-self:flex-start;">${s.tagLabel}</span>
     </div>`;
   }
@@ -616,7 +616,7 @@ async function fetchFrame() {
     }
     renderSlots();
     if(selectedId==='krista1') {
-      const dfps=document.getElementById('detail-fps'); if(dfps) dfps.textContent=slot.fps??'—';
+      const dfps=document.getElementById('detail-fps'); if(dfps) dfps.textContent=slot.fps??'â€”';
       const ov=document.getElementById('overlay-fps'); if(ov) ov.textContent=slot.fps?`${slot.fps} FPS`:'';
       const di=document.getElementById('detail-img'); if(di&&di.style.display!=='none') di.src=slot.frameUrl;
     }
@@ -704,3 +704,4 @@ setTimeout(()=>selectSlot('krista1'),200);
 </script>
 </body>
 </html>
+

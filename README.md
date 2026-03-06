@@ -1,4 +1,4 @@
-# Maestra Fleet TOX
+﻿# Maestra Fleet TOX
 
 **Real-time fleet management for interactive installations using TouchDesigner, Daydream Scope, and more.**
 
@@ -139,19 +139,19 @@ All devices share state through the Maestra entity system:
 
 ```
 maestra-fleet-tox/
-├── README.md
-├── touchdesigner/
-│   ├── maestra_fleet.tox          # The main TOX (drop into any TD project)
-│   └── build_tox.py               # Script to rebuild the TOX from scratch
-├── server/
-│   ├── server.py                  # FastAPI Maestra server
-│   ├── requirements.txt           # Python dependencies
-│   ├── Procfile                   # Railway deployment
-│   └── railway.toml               # Railway config
-└── docs/
-    ├── SETUP.md                   # Detailed setup guide
-    ├── TROUBLESHOOTING.md         # Common issues and fixes
-    └── FLEET_DASHBOARD.md         # Fleet manager dashboard docs
+â”œâ”€â”€ README.md
+â”œâ”€â”€ touchdesigner/
+â”‚   â”œâ”€â”€ maestra_fleet.tox          # The main TOX (drop into any TD project)
+â”‚   â””â”€â”€ build_tox.py               # Script to rebuild the TOX from scratch
+â”œâ”€â”€ server/
+â”‚   â”œâ”€â”€ server.py                  # FastAPI Maestra server
+â”‚   â”œâ”€â”€ requirements.txt           # Python dependencies
+â”‚   â”œâ”€â”€ Procfile                   # Railway deployment
+â”‚   â””â”€â”€ railway.toml               # Railway config
+â””â”€â”€ docs/
+    â”œâ”€â”€ SETUP.md                   # Detailed setup guide
+    â”œâ”€â”€ TROUBLESHOOTING.md         # Common issues and fixes
+    â””â”€â”€ FLEET_DASHBOARD.md         # Fleet manager dashboard docs
 ```
 
 ## Password Protection
@@ -163,14 +163,15 @@ The TOX can be password-protected in TouchDesigner:
 
 ## License
 
-- **Maestra framework** (Jordan Snyder / Meow Wolf) — MIT
-- **This TOX & fleet manager** (Krista Faist) — [AGPL 3.0](https://www.gnu.org/licenses/agpl-3.0.html)
+- **Maestra framework** (Jordan Snyder / Meow Wolf) â€” MIT
+- **This TOX & fleet manager** (Krista Faist) â€” [AGPL 3.0](https://www.gnu.org/licenses/agpl-3.0.html)
 
-AGPL 3.0 means you can use, modify, and distribute freely — but any modified version you deploy as a network service must also be open source under AGPL. For commercial use without that requirement, dual-licensing is available — contact krista@krista.art.
+AGPL 3.0 means you can use, modify, and distribute freely â€” but any modified version you deploy as a network service must also be open source under AGPL. For commercial use without that requirement, dual-licensing is available â€” contact krista@krista.art.
 
 ## Credits
 
-- **Krista Faist** — TOX development, fleet architecture, fleet manager dashboard
-- **Jordan Snyder / Meow Wolf** — Maestra framework (MIT)
-- **Daydream / Livepeer** — Scope, StreamDiffusion ecosystem
-- **DotSimulate** — StreamDiffusionTD component
+- **Krista Faist** â€” TOX development, fleet architecture, fleet manager dashboard
+- **Jordan Snyder / Meow Wolf** â€” Maestra framework (MIT)
+- **Daydream / Livepeer** â€” Scope, StreamDiffusion ecosystem
+- **DotSimulate** â€” StreamDiffusionTD component
+
