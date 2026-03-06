@@ -271,4 +271,10 @@ async def dashboard():
 
 @app.get("/")
 async def root():
-    return HTMLResponse("<h1>Maestra Fleet Manager</h1><p><a href='/dashboard'>Open Dashboard</a> | <a href='/health'>Health</a></p>")
+    return HTMLResponse("<h1>Maestra Fleet Manager</h1><p><a href='/dashboard'>Fleet Dashboard</a> | <a href='/audio'>Audio Analysis</a> | <a href='/health'>Health</a></p>")
+
+@app.get("/audio", response_class=HTMLResponse)
+async def audio_page():
+    html_path = os.path.join(os.path.dirname(__file__), "audio-analysis.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(f.read())
