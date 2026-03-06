@@ -177,6 +177,21 @@
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
+  .explainer {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11.5px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    background: linear-gradient(180deg, rgba(0,212,255,0.02) 0%, transparent 100%);
+  }
+  .ex-label { color: var(--text-bright); font-weight: 700; }
+  .ex-hi    { color: var(--accent); font-weight: 600; }
+  .ex-accent { color: var(--active); }
+  .explainer strong { color: var(--text); font-weight: 600; }
+
   @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: auto; }
     .detail-panel { border-top: 1px solid var(--border); max-height: 50vh; }
@@ -200,6 +215,11 @@
     <div class="header-time" id="clock">--:--:--</div>
   </div>
 </header>
+
+<div class="explainer">
+  <span class="ex-label">What is Maestra?</span>
+  A centralized system built by <span class="ex-hi">Jordan Snyder</span> during her time as VP of Platform for all three of <span class="ex-hi">Meow Wolf</span>'s permanent installations, going open source soon. It manages all the devices in your installation. Imagine you have <span class="ex-accent">4 projectors, 2 audio zones</span>, and <span class="ex-accent">3 sensor stations</span> across a venue — Maestra lets every device <strong>register itself, sync its state</strong> (brightness, color, scene), <strong>advertise media streams</strong> (NDI, Syphon, Spout), and <strong>receive commands</strong> via OSC, WebSocket, or MQTT — all from one dashboard. Each device runs a tiny client (TouchDesigner, Max/MSP, Arduino, web browser) that talks to the Maestra server. This TouchDesigner TOX wraps the Maestra API so you can drop it into any TD project and connect in seconds.
+</div>
 
 <div class="main">
 
