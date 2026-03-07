@@ -37,10 +37,15 @@ entities: Dict[str, dict] = {}
 entity_types: Dict[str, dict] = {}
 ws_connections: list = []
 
-video_frames = {
-    "browser": {"data": None, "timestamp": 0},
-    "td": {"data": None, "timestamp": 0},
-}
+video_frames = {}
+
+def get_room_frames(room: str = "room1"):
+    if room not in video_frames:
+        video_frames[room] = {
+            "browser": {"data": None, "timestamp": 0},
+            "td": {"data": None, "timestamp": 0},
+        }
+    return video_frames[room]
 
 # ============================================================
 # ENTITY MANAGEMENT
@@ -175,39 +180,45 @@ async def process_transcript(request: Request):
 # ============================================================
 
 @app.post("/video/frame/browser")
-async def post_browser_frame(request: Request):
+async def post_browser_frame(request: Request, room: str = "room1"):
     data = await request.body()
-    video_frames["browser"]["data"] = data
-    video_frames["browser"]["timestamp"] = time.time()
+    frames = get_room_frames(room)
+    frames["browser"]["data"] = data
+    frames["browser"]["timestamp"] = time.time()
     return Response(status_code=200)
 
 @app.get("/video/frame/browser")
-async def get_browser_frame():
-    f = video_frames["browser"]
+async def get_browser_frame(room: str = "room1"):
+    frames = get_room_frames(room)
+    f = frames["browser"]
     if f["data"] and (time.time() - f["timestamp"]) < 5:
         return Response(content=f["data"], media_type="image/jpeg")
     return Response(status_code=204)
 
 @app.post("/video/frame/td")
-async def post_td_frame(request: Request):
+async def post_td_frame(request: Request, room: str = "room1"):
     data = await request.body()
-    video_frames["td"]["data"] = data
-    video_frames["td"]["timestamp"] = time.time()
+    frames = get_room_frames(room)
+    frames["td"]["data"] = data
+    frames["td"]["timestamp"] = time.time()
     return Response(status_code=200)
 
 @app.get("/video/frame/td")
-async def get_td_frame():
-    f = video_frames["td"]
+async def get_td_frame(room: str = "room1"):
+    frames = get_room_frames(room)
+    f = frames["td"]
     if f["data"] and (time.time() - f["timestamp"]) < 5:
         return Response(content=f["data"], media_type="image/jpeg")
     return Response(status_code=204)
 
 @app.get("/video/status")
-async def video_status():
+async def video_status(room: str = "room1"):
     now = time.time()
-    b = video_frames["browser"]
-    t = video_frames["td"]
+    frames = get_room_frames(room)
+    b = frames["browser"]
+    t = frames["td"]
     return {
+        "room": room,
         "browser": b["data"] is not None and (now - b["timestamp"]) < 5,
         "browser_age": round(now - b["timestamp"], 1) if b["data"] else None,
         "td": t["data"] is not None and (now - t["timestamp"]) < 5,
